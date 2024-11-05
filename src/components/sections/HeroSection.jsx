@@ -1,4 +1,4 @@
-import { ChevronRight, Timer, BarChart2, Flag } from 'lucide-react';
+import { ChevronRight, Timer, BarChart2, Flag, Users } from 'lucide-react';
 
 const HeroSection = () => {
   return (
@@ -47,21 +47,29 @@ const HeroSection = () => {
             </div>
           </div>
 
-          {/* Right Column - App Preview */}
-          <div className="relative">
-            <div className="animate-float">
-              {/* Phone Mockup */}
-              <div className="relative mx-auto max-w-sm">
-                <div className="relative z-10 rounded-[3rem] p-2 bg-primary-dark shadow-2xl">
+          {/* Right Column - Multi-Screen App Preview */}
+          <div className="relative h-[600px] perspective-1000">
+            {/* Main Screen */}
+            <div className="relative z-30 transform translate-y-8">
+              <div className="bg-[#0A1828] p-8 rounded-[2.5rem] shadow-2xl mx-auto max-w-[280px]">
+                {/* Minimal Timer Display */}
+                <div className="text-center space-y-4">
+                  <div className="text-[48px] font-mono text-white tracking-wider animate-pulse">
                   <img 
-                    src="/app-screen-1.png" 
-                    alt="Chikane App Interface"
-                    className="rounded-[2.5rem] w-full"
+                   src="/images/app-screen-1.png" 
+                   alt="Chikane App Interface"
+                  className="rounded-[2.5rem] w-full"
                   />
+                  </div>
+                  <div className="text-accent text-sm uppercase tracking-widest">
+                   
+                  </div>
                 </div>
-                
-                {/* Feature Highlights */}
-                <div className="absolute -right-16 top-20 glassmorphism p-4 rounded-xl shadow-lg">
+              </div>
+
+              {/* Floating Feature Cards */}
+              <div className="absolute -right-20 top-12 z-40">
+                <div className="glassmorphism p-4 rounded-xl shadow-lg">
                   <div className="flex items-center gap-3">
                     <Timer className="text-accent"/>
                     <div>
@@ -70,18 +78,51 @@ const HeroSection = () => {
                     </div>
                   </div>
                 </div>
+              </div>
 
-                <div className="absolute -left-16 bottom-20 glassmorphism p-4 rounded-xl shadow-lg">
+              <div className="absolute -left-20 top-32 z-40">
+                <div className="glassmorphism p-4 rounded-xl shadow-lg">
                   <div className="flex items-center gap-3">
                     <BarChart2 className="text-highlight"/>
                     <div>
-                      <p className="font-semibold">Real-time Analytics</p>
-                      <p className="text-sm text-gray-600">Deep insights</p>
+                      <p className="font-semibold">Analytics</p>
+                      <p className="text-sm text-gray-600">Real-time insights</p>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
+
+            {/* Background Screens */}
+            <div className="absolute z-20 -left-16 top-20 transform -rotate-6">
+              <div className="bg-[#0A1828] p-6 rounded-[2.5rem] opacity-80 max-w-[280px]">
+                {/* Analytics Screen */}
+                <div className="h-[500px] w-full flex items-center justify-center">
+                <img 
+                src="/images/app-screen-2.png" 
+              alt="Chikane App Interface"
+               className="rounded-[2.5rem] w-full"
+                />
+                </div>
+              </div>
+            </div>
+
+            <div className="absolute z-10 -right-16 top-20 transform rotate-6">
+              <div className="bg-[#0A1828] p-6 rounded-[2.5rem] opacity-80 max-w-[280px]">
+                {/* Leaderboard Screen */}
+                <div className="h-[500px] w-full flex items-center justify-center">
+                <img 
+  src="/images/app-screen-3.png" 
+  alt="Chikane App Interface"
+  className="rounded-[2.5rem] w-full"
+/>
+                </div>
+              </div>
+            </div>
+
+            {/* Decorative Elements */}
+            <div className="absolute -top-4 -right-4 w-32 h-32 bg-accent/10 rounded-full blur-xl"/>
+            <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-highlight/10 rounded-full blur-xl"/>
           </div>
         </div>
       </div>

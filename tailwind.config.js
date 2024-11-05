@@ -1,15 +1,21 @@
 /** @type {import('tailwindcss').Config} */
-export default {
+module.exports = {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     extend: {
+      
+      perspective: {
+        '1000': 'perspective(1000px)',
+      },
+
       colors: {
         primary: {
           dark: '#0A1828',
           light: '#E6F0FF',
+          
         },
         accent: '#FF4500',
         highlight: '#007AFF',

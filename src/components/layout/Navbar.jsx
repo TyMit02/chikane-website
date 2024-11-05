@@ -12,6 +12,8 @@ const Navbar = () => {
   }, []);
 
   const menuItems = [
+    {name: 'Privacy Policy', href: 'PrivacyPolicy.html'},
+    {name: 'Contact us', href: 'Contact.jsx'},
     { name: 'Features', href: '#features' },
     { name: 'Analytics', href: '#analytics' },
     { name: 'Events', href: '#events' },
