@@ -1,17 +1,20 @@
+/* src/styles/index.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  scroll-behavior: smooth;
+@layer base {
+  :root {
+    scroll-behavior: smooth;
+  }
 }
 
-.glassmorphism {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
+@layer components {
+  .glassmorphism {
+    @apply bg-white/10 backdrop-blur-md border border-white/10;
+  }
 
-.text-gradient {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-accent to-highlight;
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-accent to-highlight;
+  }
 }
