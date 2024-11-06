@@ -1,70 +1,132 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import path from 'path';
 
 export default defineConfig({
   plugins: [react()],
-  base: '/', // Correct for custom domain
   
+  // Base URL configuration
+  base: '/',
+  
+  // Development server configuration
   server: {
     port: 3000,
     host: true,
-    // Add historyApiFallback for client-side routing
+    open: true,
+    strictPort: true,
+    middlewareMode: 'html',
+    // Enhanced history fallback for SPA routing
     historyApiFallback: {
-      disableDotRule: true
+      disableDotRule: true,
+      rewrites: [
+        { from: /^\/[^.]+$/, to: '/index.html' }
+      ]
     }
   },
   
+  // Preview server configuration
   preview: {
-    // Also add historyApiFallback to preview server
-    historyApiFallback: true,
     port: 3000,
-    host: true
+    host: true,
+    strictPort: true,
+    historyApiFallback: true
   },
   
+  // Build configuration
   build: {
     outDir: 'dist',
-    // Generate a 404.html that mirrors index.html for SPA routing
+    emptyOutDir: true,
+    minify: 'terser',
+    sourcemap: true,
+    reportCompressedSize: true,
+    chunkSizeWarningLimit: 1000,
+    
+    // Rollup specific options
     rollupOptions: {
       input: {
-        main: './index.html'
+        main: path.resolve(__dirname, 'index.html'),
       },
       output: {
+        // Chunk splitting configuration
         manualChunks: {
           vendor: ['react', 'react-dom', 'react-router-dom'],
-          animations: ['framer-motion']
-        }
+          animations: ['framer-motion'],
+          icons: ['lucide-react']
+        },
+        // Asset file naming
+        assetFileNames: (assetInfo) => {
+          const extType = assetInfo.name.split('.').at(1);
+          if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(extType)) {
+            return `assets/images/[name]-[hash][extname]`;
+          }
+          return `assets/[name]-[hash][extname]`;
+        },
+        // Chunk file naming
+        chunkFileNames: 'assets/js/[name]-[hash].js',
+        // Entry file naming
+        entryFileNames: 'assets/js/[name]-[hash].js',
       }
     },
-    // Ensure proper module loading
+    
+    // Module preload options
     modulePreload: {
-      polyfill: true
+      polyfill: true,
+      resolveDependencies: (filename, deps, { hostId, hostType }) => deps
     },
-    sourcemap: true,
-    assetsDir: 'assets',
-    minify: 'terser',
+    
+    // Terser minification options
     terserOptions: {
       compress: {
-        drop_console: true
+        drop_console: true,
+        drop_debugger: true
+      },
+      format: {
+        comments: false
       }
     },
-    // Add SPA-specific build options
-    ssrManifest: false,
+    
+    // SPA specific options
     manifest: true,
-    // Ensure clean URLs work
-    copyPublicDir: true
+    ssrManifest: false,
+    copyPublicDir: true,
+    assetsDir: 'assets'
   },
   
+  // Module resolution configuration
   resolve: {
-    extensions: ['.js', '.jsx', '.ts', '.tsx'],
-    // Add alias for absolute imports if needed
+    extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
     alias: {
-      '@': '/src'
+      '@': path.resolve(__dirname, './src'),
+      '@components': path.resolve(__dirname, './src/components'),
+      '@pages': path.resolve(__dirname, './src/components/pages'),
+      '@sections': path.resolve(__dirname, './src/components/sections'),
+      '@layout': path.resolve(__dirname, './src/components/layout'),
+      '@styles': path.resolve(__dirname, './src/styles'),
+      '@config': path.resolve(__dirname, './src/config'),
+      '@services': path.resolve(__dirname, './src/services')
     }
   },
   
-  // Add optimizeDeps for better dev performance
+  // Dependency optimization
   optimizeDeps: {
-    include: ['react', 'react-dom', 'react-router-dom', 'framer-motion'],
-    exclude: []
+    include: [
+      'react',
+      'react-dom',
+      'react-router-dom',
+      'framer-motion',
+      'lucide-react'
+    ],
+    exclude: [],
+    esbuildOptions: {
+      target: 'es2020'
+    }
+  },
+  
+  // CSS configuration
+  css: {
+    devSourcemap: true,
+    modules: {
+      scopeBehaviour: 'local'
+    }
   }
 });

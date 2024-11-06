@@ -12,7 +12,6 @@ import Events from './components/pages/Events';
 import PrivacyPolicy from './components/pages/PrivacyPolicy';
 import Contact from './components/pages/Contact';
 
-// Wrap each page with animations
 const PageWrapper = ({ children }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
@@ -24,7 +23,6 @@ const PageWrapper = ({ children }) => (
   </motion.div>
 );
 
-// Home page component with all sections
 const HomePage = () => (
   <PageWrapper>
     <div className="overflow-hidden">
@@ -36,36 +34,40 @@ const HomePage = () => (
   </PageWrapper>
 );
 
-// Main content component with routes
-const AppRoutes = () => {
+function AppContent() {
   const location = useLocation();
-
+  
   return (
-    <AnimatePresence mode="wait" initial={false}>
-      <Routes location={location} key={location.pathname}>
-        <Route path="/" element={<HomePage />} />
-        <Route path="features" element={<PageWrapper><Features /></PageWrapper>} />
-        <Route path="analytics" element={<PageWrapper><Analytics /></PageWrapper>} />
-        <Route path="events" element={<PageWrapper><Events /></PageWrapper>} />
-        <Route path="contact" element={<PageWrapper><Contact /></PageWrapper>} />
-        <Route path="privacy" element={<PageWrapper><PrivacyPolicy /></PageWrapper>} />
-        <Route path="*" element={<PageWrapper><div>404 Not Found</div></PageWrapper>} />
-      </Routes>
-    </AnimatePresence>
+    <div className="flex flex-col min-h-screen">
+      <Navbar />
+      <main className="flex-grow">
+        <AnimatePresence mode="wait" initial={false}>
+          <Routes location={location} key={location.pathname}>
+            <Route index element={<HomePage />} />
+            <Route path="features" element={<PageWrapper><Features /></PageWrapper>} />
+            <Route path="analytics" element={<PageWrapper><Analytics /></PageWrapper>} />
+            <Route path="events" element={<PageWrapper><Events /></PageWrapper>} />
+            <Route path="contact" element={<PageWrapper><Contact /></PageWrapper>} />
+            <Route path="privacy" element={<PageWrapper><PrivacyPolicy /></PageWrapper>} />
+            <Route path="*" element={
+              <PageWrapper>
+                <div className="flex items-center justify-center h-screen">
+                  <h1 className="text-2xl">404 - Page Not Found</h1>
+                </div>
+              </PageWrapper>
+            } />
+          </Routes>
+        </AnimatePresence>
+      </main>
+      <Footer />
+    </div>
   );
-};
+}
 
-// Main App component
 function App() {
   return (
-    <Router basename={import.meta.env.BASE_URL}>
-      <div className="flex flex-col min-h-screen">
-        <Navbar />
-        <main className="flex-grow">
-          <AppRoutes />
-        </main>
-        <Footer />
-      </div>
+    <Router>
+      <AppContent />
     </Router>
   );
 }
