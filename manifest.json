@@ -1,0 +1,27 @@
+{
+  "_animations-1b6258b3.js": {
+    "file": "assets/animations-1b6258b3.js",
+    "imports": [
+      "_vendor-f988137d.js"
+    ]
+  },
+  "_vendor-f988137d.js": {
+    "file": "assets/vendor-f988137d.js"
+  },
+  "index.css": {
+    "file": "assets/index-d963b44a.css",
+    "src": "index.css"
+  },
+  "index.html": {
+    "css": [
+      "assets/index-d963b44a.css"
+    ],
+    "file": "assets/main-dc7c649e.js",
+    "imports": [
+      "_vendor-f988137d.js",
+      "_animations-1b6258b3.js"
+    ],
+    "isEntry": true,
+    "src": "index.html"
+  }
+}
