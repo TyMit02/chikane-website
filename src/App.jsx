@@ -36,34 +36,36 @@ const HomePage = () => (
   </PageWrapper>
 );
 
-// AnimatedRoutes component to handle route transitions
-function AnimatedRoutes() {
+// Separate RouterProvider component to access useLocation
+const RouterProvider = () => {
   const location = useLocation();
   
   return (
-    <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
-        <Route path="/" element={<HomePage />} />  {/* Changed from Home to HomePage */}
-        <Route path="/features" element={<Features />} />
-        <Route path="/analytics" element={<Analytics />} />
-        <Route path="events" element={<Events />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/privacy" element={<PrivacyPolicy />} /> 
-      </Routes>
-    </AnimatePresence>
+    <div className="flex flex-col min-h-screen">
+      <Navbar />
+      <main className="flex-grow">
+        <AnimatePresence mode="wait" initial={false}>
+          <Routes location={location} key={location.pathname}>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/features" element={<PageWrapper><Features /></PageWrapper>} />
+            <Route path="/analytics" element={<PageWrapper><Analytics /></PageWrapper>} />
+            <Route path="/events" element={<PageWrapper><Events /></PageWrapper>} />
+            <Route path="/contact" element={<PageWrapper><Contact /></PageWrapper>} />
+            <Route path="/privacy" element={<PageWrapper><PrivacyPolicy /></PageWrapper>} />
+            <Route path="*" element={<PageWrapper><div>404 Not Found</div></PageWrapper>} />
+          </Routes>
+        </AnimatePresence>
+      </main>
+      <Footer />
+    </div>
   );
-}
+};
 
+// Main App component
 function App() {
   return (
     <Router>
-      <div className="flex flex-col min-h-screen">
-        <Navbar />
-        <main className="flex-grow">
-          <AnimatedRoutes />
-        </main>
-        <Footer />
-      </div>
+      <RouterProvider />
     </Router>
   );
 }
