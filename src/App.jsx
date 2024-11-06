@@ -36,36 +36,36 @@ const HomePage = () => (
   </PageWrapper>
 );
 
-// Separate RouterProvider component to access useLocation
-const RouterProvider = () => {
+// Main content component with routes
+const AppRoutes = () => {
   const location = useLocation();
-  
+
   return (
-    <div className="flex flex-col min-h-screen">
-      <Navbar />
-      <main className="flex-grow">
-        <AnimatePresence mode="wait" initial={false}>
-          <Routes location={location} key={location.pathname}>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/features" element={<PageWrapper><Features /></PageWrapper>} />
-            <Route path="/analytics" element={<PageWrapper><Analytics /></PageWrapper>} />
-            <Route path="/events" element={<PageWrapper><Events /></PageWrapper>} />
-            <Route path="/contact" element={<PageWrapper><Contact /></PageWrapper>} />
-            <Route path="/privacy" element={<PageWrapper><PrivacyPolicy /></PageWrapper>} />
-            <Route path="*" element={<PageWrapper><div>404 Not Found</div></PageWrapper>} />
-          </Routes>
-        </AnimatePresence>
-      </main>
-      <Footer />
-    </div>
+    <AnimatePresence mode="wait" initial={false}>
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<HomePage />} />
+        <Route path="features" element={<PageWrapper><Features /></PageWrapper>} />
+        <Route path="analytics" element={<PageWrapper><Analytics /></PageWrapper>} />
+        <Route path="events" element={<PageWrapper><Events /></PageWrapper>} />
+        <Route path="contact" element={<PageWrapper><Contact /></PageWrapper>} />
+        <Route path="privacy" element={<PageWrapper><PrivacyPolicy /></PageWrapper>} />
+        <Route path="*" element={<PageWrapper><div>404 Not Found</div></PageWrapper>} />
+      </Routes>
+    </AnimatePresence>
   );
 };
 
 // Main App component
 function App() {
   return (
-    <Router>
-      <RouterProvider />
+    <Router basename={import.meta.env.BASE_URL}>
+      <div className="flex flex-col min-h-screen">
+        <Navbar />
+        <main className="flex-grow">
+          <AppRoutes />
+        </main>
+        <Footer />
+      </div>
     </Router>
   );
 }
