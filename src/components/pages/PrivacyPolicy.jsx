@@ -47,7 +47,7 @@ const PrivacyPolicy = () => {
               <h2 className="text-2xl font-semibold text-primary-dark mb-4">Contact Us</h2>
               <p>If you have any questions about this Privacy Policy, please contact us at:</p>
               <a href="mailto:ty@chikaneapp.com" className="text-accent hover:underline">
-                privacy@chikaneapp.com
+                ty@chikaneapp.com
               </a>
             </section>
   
