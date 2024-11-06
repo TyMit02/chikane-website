@@ -1,12 +1,12 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: '/chikane-website/', // Only for GitHub Pages deployment
+  base: '/',  // Keep as '/' for custom domain
   server: {
     port: 3000,
+    host: true // Add this to allow network access
   },
   build: {
     outDir: 'dist',
@@ -17,5 +17,22 @@ export default defineConfig({
         },
       },
     },
+    // Add these options to ensure proper module loading
+    modulePreload: {
+      polyfill: true
+    },
+    sourcemap: true,
+    // Ensure proper MIME types
+    assetsDir: 'assets',
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+      },
+    },
   },
+  // Add resolve config for proper file extensions
+  resolve: {
+    extensions: ['.js', '.jsx', '.ts', '.tsx']
+  }
 });
