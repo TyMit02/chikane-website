@@ -6,6 +6,9 @@ import HeroSection from "./components/sections/HeroSection";
 import FeaturesSection from "./components/sections/FeaturesSection";
 import AnalyticsSection from "./components/sections/AnalyticsSection";
 import EventsSection from "./components/sections/EventsSection";
+import Features from './components/pages/Features';
+import Analytics from './components/pages/Analytics';
+import Events from './components/pages/Events';
 import PrivacyPolicy from './components/pages/PrivacyPolicy';
 import Contact from './components/pages/Contact';
 
@@ -40,18 +43,12 @@ function AnimatedRoutes() {
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
-        <Route 
-          path="/" 
-          element={<HomePage />} 
-        />
-        <Route 
-          path="/privacy" 
-          element={<PageWrapper><PrivacyPolicy /></PageWrapper>} 
-        />
-        <Route 
-          path="/contact" 
-          element={<PageWrapper><Contact /></PageWrapper>} 
-        />
+        <Route path="/" element={<HomePage />} />  {/* Changed from Home to HomePage */}
+        <Route path="/features" element={<Features />} />
+        <Route path="/analytics" element={<Analytics />} />
+        <Route path="events" element={<Events />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} /> 
       </Routes>
     </AnimatePresence>
   );
@@ -62,7 +59,7 @@ function App() {
     <Router>
       <div className="flex flex-col min-h-screen">
         <Navbar />
-        <main className="flex-grow overflow-x-hidden">
+        <main className="flex-grow">
           <AnimatedRoutes />
         </main>
         <Footer />

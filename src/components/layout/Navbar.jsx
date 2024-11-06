@@ -15,11 +15,14 @@ const Navbar = () => {
   }, []);
 
   const menuItems = [
-    { name: 'Privacy Policy', to: '/privacy' },
-    { name: 'Contact us', to: '/contact' },
-    { name: 'Features', to: '/#features', isHash: true },
-    { name: 'Analytics', to: '/#analytics', isHash: true },
-    { name: 'Events', to: '/#events', isHash: true },
+    // Main pages
+    { name: 'Features', to: '/features' },
+    { name: 'Analytics', to: '/analytics' },
+    { name: 'Events', to: '/events' },
+    // Support pages
+    { name: 'Contact', to: '/contact' },
+    { name: 'Privacy', to: '/privacy' },
+    // Special button
     { name: 'Download', to: '/#download', isButton: true, isHash: true }
   ];
 
@@ -38,40 +41,17 @@ const Navbar = () => {
     setIsMenuOpen(false);
   };
 
-  const navVariants = {
-    hidden: { y: -100, opacity: 0 },
-    visible: { 
-      y: 0, 
-      opacity: 1,
-      transition: { duration: 0.3, ease: "easeOut" }
-    }
-  };
-
-  const menuVariants = {
-    closed: {
-      opacity: 0,
-      height: 0,
-      transition: { duration: 0.3, ease: "easeInOut" }
-    },
-    open: {
-      opacity: 1,
-      height: "auto",
-      transition: { duration: 0.3, ease: "easeInOut" }
-    }
-  };
-
   return (
     <motion.nav
-      initial="hidden"
-      animate="visible"
-      variants={navVariants}
+      initial={{ y: -100, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
       className={`fixed w-full z-50 transition-all duration-300 ${
         scrolled ? 'bg-white/80 backdrop-blur-md shadow-lg' : 'bg-transparent'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
-          {/* Logo with hover animation */}
+          {/* Logo */}
           <motion.div
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -84,29 +64,22 @@ const Navbar = () => {
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-8">
             {menuItems.map((item) => (
-              item.isHash ? (
-                <motion.a
-                  key={item.name}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  href={item.to}
-                  className={item.isButton ?
-                    "px-6 py-2 bg-accent text-white rounded-lg hover:bg-accent/90 transition-all" :
-                    "text-gray-600 hover:text-accent transition-colors"
-                  }
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleNavClick(item);
-                  }}
-                >
-                  {item.name}
-                </motion.a>
-              ) : (
-                <motion.div
-                  key={item.name}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
+              <motion.div
+                key={item.name}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {item.isHash ? (
+                  <button
+                    onClick={() => handleNavClick(item)}
+                    className={item.isButton ?
+                      "px-6 py-2 bg-accent text-white rounded-lg hover:bg-accent/90 transition-all" :
+                      "text-gray-600 hover:text-accent transition-colors"
+                    }
+                  >
+                    {item.name}
+                  </button>
+                ) : (
                   <Link
                     to={item.to}
                     className={`text-gray-600 hover:text-accent transition-colors ${
@@ -115,8 +88,8 @@ const Navbar = () => {
                   >
                     {item.name}
                   </Link>
-                </motion.div>
-              )
+                )}
+              </motion.div>
             ))}
           </div>
 
@@ -131,14 +104,13 @@ const Navbar = () => {
           </motion.button>
         </div>
 
-        {/* Mobile Menu with AnimatePresence */}
+        {/* Mobile Menu */}
         <AnimatePresence>
           {isMenuOpen && (
             <motion.div
-              initial="closed"
-              animate="open"
-              exit="closed"
-              variants={menuVariants}
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
               className="md:hidden fixed left-0 right-0 bg-white/90 backdrop-blur-md"
             >
               <div className="px-4 py-6 space-y-4">
@@ -149,18 +121,14 @@ const Navbar = () => {
                     transition={{ duration: 0.2 }}
                   >
                     {item.isHash ? (
-                      <a
-                        href={item.to}
-                        className={`block ${item.isButton ?
+                      <button
+                        onClick={() => handleNavClick(item)}
+                        className={`block w-full text-left ${item.isButton ?
                           "px-6 py-2 bg-accent text-white rounded-lg text-center" :
                           "text-gray-600 hover:text-accent"}`}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleNavClick(item);
-                        }}
                       >
                         {item.name}
-                      </a>
+                      </button>
                     ) : (
                       <Link
                         to={item.to}
