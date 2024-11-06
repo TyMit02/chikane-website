@@ -1,25 +1,32 @@
 {
-  "_animations-1b6258b3.js": {
-    "file": "assets/animations-1b6258b3.js",
+  "_animations-7b0683f6.js": {
+    "file": "assets/js/animations-7b0683f6.js",
     "imports": [
-      "_vendor-f988137d.js"
+      "_vendor-03e0e273.js"
     ]
   },
-  "_vendor-f988137d.js": {
-    "file": "assets/vendor-f988137d.js"
+  "_icons-8f128831.js": {
+    "file": "assets/js/icons-8f128831.js",
+    "imports": [
+      "_vendor-03e0e273.js"
+    ]
+  },
+  "_vendor-03e0e273.js": {
+    "file": "assets/js/vendor-03e0e273.js"
   },
   "index.css": {
-    "file": "assets/index-d963b44a.css",
+    "file": "assets/index-aa56ef91.css",
     "src": "index.css"
   },
   "index.html": {
     "css": [
-      "assets/index-d963b44a.css"
+      "assets/index-aa56ef91.css"
     ],
-    "file": "assets/main-97348819.js",
+    "file": "assets/js/main-417f1ef9.js",
     "imports": [
-      "_vendor-f988137d.js",
-      "_animations-1b6258b3.js"
+      "_vendor-03e0e273.js",
+      "_animations-7b0683f6.js",
+      "_icons-8f128831.js"
     ],
     "isEntry": true,
     "src": "index.html"
