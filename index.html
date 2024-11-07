@@ -1,19 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="/chikane-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="Content-Type" content="text/javascript; charset=utf-8"/>
-    <title>Chikane</title>
-  <script type="module" crossorigin src="/assets/js/main-417f1ef9.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/js/vendor-03e0e273.js">
-  <link rel="modulepreload" crossorigin href="/assets/js/animations-7b0683f6.js">
-  <link rel="modulepreload" crossorigin href="/assets/js/icons-8f128831.js">
-  <link rel="stylesheet" href="/assets/index-aa56ef91.css">
-</head>
-<body>
+    <title>Chikane App</title>
+    <!-- Start Single Page Apps for GitHub Pages -->
+    <script type="text/javascript">
+      // Single Page Apps for GitHub Pages
+      // MIT License
+      // https://github.com/rafgraph/spa-github-pages
+      (function(l) {
+        if (l.search[1] === '/' ) {
+          var decoded = l.search.slice(1).split('&').map(function(s) { 
+            return s.replace(/~and~/g, '&')
+          }).join('?');
+          window.history.replaceState(null, null,
+              l.pathname.slice(0, -1) + decoded + l.hash
+          );
+        }
+      }(window.location))
+    </script>
+    <!-- End Single Page Apps for GitHub Pages -->
+    <script type="module" crossorigin src="/assets/main-3866f2c1.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/vendor-5b8fdfcc.js">
+    <link rel="modulepreload" crossorigin href="/assets/animations-77e7b886.js">
+    <link rel="stylesheet" href="/assets/index-aa56ef91.css">
+  </head>
+  <body>
     <div id="root"></div>
     
-</body>
+  </body>
 </html>
