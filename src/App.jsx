@@ -34,40 +34,40 @@ const HomePage = () => (
   </PageWrapper>
 );
 
-function AppContent() {
+function AppRoutes() {
   const location = useLocation();
   
   return (
-    <div className="flex flex-col min-h-screen">
-      <Navbar />
-      <main className="flex-grow">
-        <AnimatePresence mode="wait" initial={false}>
-          <Routes location={location} key={location.pathname}>
-            <Route index element={<HomePage />} />
-            <Route path="features" element={<PageWrapper><Features /></PageWrapper>} />
-            <Route path="analytics" element={<PageWrapper><Analytics /></PageWrapper>} />
-            <Route path="events" element={<PageWrapper><Events /></PageWrapper>} />
-            <Route path="contact" element={<PageWrapper><Contact /></PageWrapper>} />
-            <Route path="privacy" element={<PageWrapper><PrivacyPolicy /></PageWrapper>} />
-            <Route path="*" element={
-              <PageWrapper>
-                <div className="flex items-center justify-center h-screen">
-                  <h1 className="text-2xl">404 - Page Not Found</h1>
-                </div>
-              </PageWrapper>
-            } />
-          </Routes>
-        </AnimatePresence>
-      </main>
-      <Footer />
-    </div>
+    <AnimatePresence mode="wait" initial={false}>
+      <Routes location={location} key={location.pathname}>
+        <Route index element={<HomePage />} />
+        <Route path="/features" element={<PageWrapper><Features /></PageWrapper>} />
+        <Route path="/analytics" element={<PageWrapper><Analytics /></PageWrapper>} />
+        <Route path="/events" element={<PageWrapper><Events /></PageWrapper>} />
+        <Route path="/contact" element={<PageWrapper><Contact /></PageWrapper>} />
+        <Route path="/privacy" element={<PageWrapper><PrivacyPolicy /></PageWrapper>} />
+        <Route path="*" element={
+          <PageWrapper>
+            <div className="flex items-center justify-center h-screen">
+              <h1 className="text-2xl">404 - Page Not Found</h1>
+            </div>
+          </PageWrapper>
+        } />
+      </Routes>
+    </AnimatePresence>
   );
 }
 
 function App() {
   return (
-    <Router>
-      <AppContent />
+    <Router basename={import.meta.env.BASE_URL}>
+      <div className="flex flex-col min-h-screen">
+        <Navbar />
+        <main className="flex-grow">
+          <AppRoutes />
+        </main>
+        <Footer />
+      </div>
     </Router>
   );
 }
