@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import logo from '../assets/logo.png';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -56,8 +57,16 @@ const Navbar = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            <Link to="/" className="text-2xl font-bold text-primary-dark">
-              Chikane
+            <Link to="/" className="flex items-center">
+              <img 
+                src={logo} 
+                alt="Chikane Logo" 
+                className="h-8 w-auto" // Adjust size as needed
+              />
+              {/* Optionally keep text next to logo */}
+              <span className="ml-2 text-2xl font-bold text-primary-dark">
+                Chikane
+              </span>
             </Link>
           </motion.div>
 
