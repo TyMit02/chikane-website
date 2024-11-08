@@ -19,8 +19,8 @@ import Contact from './components/pages/Contact';
 
 // New imports
 import Dashboard from '../src/pages/Dashboard.jsx';
-import Login from '../src/pages/auth/Login';
-import SignUp from '../src/pages/auth/SignUp';
+import Login from './components/pages/auth/Login';
+import SignUp from './components/pages/auth/SignUp';
 // Firebase configuration
 const firebaseConfig = {
   // Add your Firebase config here
