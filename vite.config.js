@@ -5,7 +5,6 @@ import path from 'path'
 export default defineConfig({
   plugins: [react()],
   base: '/',
-  
   build: {
     outDir: 'dist',
     emptyOutDir: true,
@@ -18,7 +17,8 @@ export default defineConfig({
         manualChunks: {
           vendor: ['react', 'react-dom', 'react-router-dom'],
           animations: ['framer-motion'],
-          icons: ['lucide-react']
+          icons: ['lucide-react'],
+          firebase: ['firebase/app', 'firebase/auth', 'firebase/firestore']
         },
         entryFileNames: 'assets/js/[name]-[hash].js',
         chunkFileNames: 'assets/js/[name]-[hash].js',
@@ -47,7 +47,9 @@ export default defineConfig({
       }
     }
   },
-
+  optimizeDeps: {
+    include: ['firebase/app', 'firebase/auth', 'firebase/firestore']
+  },
   server: {
     port: 3000,
     host: true,
@@ -55,13 +57,11 @@ export default defineConfig({
       strict: true
     }
   },
-
   preview: {
     port: 3000,
     host: true,
     strictPort: true
   },
-
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
