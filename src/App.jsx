@@ -5,7 +5,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './config/firebase';
 
 // Existing imports
-import Navbar from './components/layout/Navbar';
+import Navbar from './components/layout/Navbar/index.jsx';
 import Footer from './components/layout/Footer';
 import HeroSection from "./components/sections/HeroSection";
 import FeaturesSection from "./components/sections/FeaturesSection";

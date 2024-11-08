@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { auth } from '../config/firebase';
+import { auth } from '@/config/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 
