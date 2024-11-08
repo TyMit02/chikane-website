@@ -18,7 +18,7 @@ import PrivacyPolicy from './components/pages/PrivacyPolicy';
 import Contact from './components/pages/Contact';
 
 // Page imports
-import Dashboard from './components/pages/Dashboard';
+import Dashboard from './pages/Dashboard';
 import Login from './components/pages/auth/Login';
 import SignUp from './components/pages/auth/SignUp';
 
