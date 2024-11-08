@@ -18,10 +18,9 @@ import PrivacyPolicy from './components/pages/PrivacyPolicy';
 import Contact from './components/pages/Contact';
 
 // New imports
-import Dashboard from '@/pages/Dashboard';
-import Login from '@/pages/auth/Login';
-import SignUp from '@/pages/auth/SignUp';
-
+import Dashboard from './pages/Dashboard';
+import Login from './pages/auth/Login';
+import SignUp from './pages/auth/SignUp';
 // Firebase configuration
 const firebaseConfig = {
   // Add your Firebase config here
