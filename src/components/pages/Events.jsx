@@ -5,7 +5,7 @@ import {
   Star, Bell, Mail, ChevronRight,
   Zap, Shield, Settings, Trophy
 } from 'lucide-react';
-import { db } from '../config/firebase';
+import { db } from '@/config/firebase';
 import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
 
 const Events = () => {
