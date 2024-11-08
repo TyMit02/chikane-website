@@ -11,7 +11,7 @@ import {
 
 const Footer = () => {
   const socialLinks = [
-    { icon: <Facebook />, href: '#', label: 'Facebook' },
+    { icon: <Facebook />, href: 'https://www.instagram.com/chikane_app/', label: 'Facebook' },
     { icon: <Twitter />, href: '#', label: 'Twitter' },
     { icon: <Instagram />, href: '#', label: 'Instagram' },
     { icon: <Youtube />, href: '#', label: 'YouTube' }
@@ -99,7 +99,7 @@ const Footer = () => {
             <div className="space-y-2">
               <div className="flex items-center space-x-2 text-gray-400">
                 <Mail size={20} />
-                <span>ty@chikaneapp.com</span>
+                <span>support@chikaneapp.com</span>
               </div>
               <div className="flex items-center space-x-2 text-gray-400">
                 <Phone size={20} />
