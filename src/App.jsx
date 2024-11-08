@@ -19,8 +19,8 @@ import Contact from './components/pages/Contact';
 
 // Page imports
 import Dashboard from './pages/Dashboard';
-import Login from './components/pages/auth/Login';
-import SignUp from './components/pages/auth/SignUp';
+import Login from './pages/auth/Login';
+import SignUp from './pages/auth/SignUp';
 
 // Create Auth Context
 const AuthContext = createContext();
