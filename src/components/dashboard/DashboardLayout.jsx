@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Calendar, Users, Clock, Settings, Bell, Filter,
   Plus, Search, ChevronLeft, ChevronRight, Timer,
-  BarChart2, Camera
+  BarChart2, Camera, User
 } from 'lucide-react';
 
+// Event Status Badge Component
 const EventStatusBadge = ({ status }) => {
   const statusStyles = {
     draft: 'bg-gray-100 text-gray-600',
@@ -23,6 +25,7 @@ const EventStatusBadge = ({ status }) => {
   );
 };
 
+// Event Card Component
 const EventCard = ({ event }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
@@ -48,17 +51,42 @@ const EventCard = ({ event }) => (
       </div>
     </div>
     <div className="mt-4 pt-4 border-t flex justify-end">
-      <button className="px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors">
+      <Link 
+        to={`/dashboard/events/${event.id}`}
+        className="px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors"
+      >
         Manage Event
-      </button>
+      </Link>
     </div>
   </motion.div>
 );
 
-const DashboardLayout = () => {
+// Navigation Item Component
+const NavItem = ({ icon: Icon, label, path, collapsed }) => {
+  const location = useLocation();
+  const isActive = location.pathname.startsWith(path);
+
+  return (
+    <Link
+      to={path}
+      className={`flex items-center gap-4 p-3 rounded-lg transition-colors
+        ${isActive 
+          ? 'bg-accent/10 text-accent' 
+          : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+        }`}
+    >
+      <Icon size={20} />
+      {!collapsed && <span>{label}</span>}
+    </Link>
+  );
+};
+
+// Dashboard Layout Component
+const DashboardLayout = ({ children }) => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [view, setView] = useState('grid');
   const [filterOpen, setFilterOpen] = useState(false);
+  const location = useLocation();
 
   const menuItems = [
     { icon: Calendar, label: 'Events', path: '/dashboard/events' },
@@ -92,7 +120,9 @@ const DashboardLayout = () => {
         {/* Logo */}
         <div className="flex h-16 items-center justify-between px-4 border-b">
           {!sidebarCollapsed && (
-            <span className="text-xl font-bold text-gray-800">Chikane</span>
+            <Link to="/dashboard" className="text-xl font-bold text-gray-800">
+              Chikane
+            </Link>
           )}
           <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
@@ -105,14 +135,11 @@ const DashboardLayout = () => {
         {/* Navigation */}
         <nav className="p-4">
           {menuItems.map((item) => (
-            <a
+            <NavItem
               key={item.label}
-              href={item.path}
-              className="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900"
-            >
-              <item.icon size={20} />
-              {!sidebarCollapsed && <span>{item.label}</span>}
-            </a>
+              {...item}
+              collapsed={sidebarCollapsed}
+            />
           ))}
         </nav>
       </div>
@@ -121,92 +148,24 @@ const DashboardLayout = () => {
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
         <header className="h-16 bg-white shadow-sm flex items-center justify-between px-6">
-          <h1 className="text-xl font-semibold text-gray-800">Dashboard</h1>
+          <h1 className="text-xl font-semibold text-gray-800">
+            {menuItems.find(item => 
+              location.pathname.startsWith(item.path))?.label || 'Dashboard'}
+          </h1>
           <div className="flex items-center gap-4">
             <button className="p-2 rounded-lg hover:bg-gray-100 relative">
               <Bell size={20} />
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
             </button>
-            <div className="w-8 h-8 bg-gray-300 rounded-full"></div>
+            <div className="w-8 h-8 bg-accent/10 rounded-full flex items-center justify-center">
+              <User className="w-5 h-5 text-accent" />
+            </div>
           </div>
         </header>
 
         {/* Main Content Area */}
         <div className="flex-1 overflow-auto">
-          {/* Event Management Header */}
-          <div className="bg-white shadow-sm">
-            <div className="max-w-7xl mx-auto px-6 py-6">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900">Event Management</h2>
-                  <p className="text-gray-600">Manage your track day events</p>
-                </div>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  className="flex items-center px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors"
-                >
-                  <Plus className="w-5 h-5 mr-2" />
-                  Create Event
-                </motion.button>
-              </div>
-            </div>
-          </div>
-
-          {/* Event List/Grid Section */}
-          <div className="max-w-7xl mx-auto px-6 py-8">
-            {/* Filters and Search */}
-            <div className="mb-6 flex justify-between items-center">
-              <div className="flex items-center space-x-4">
-                <div className="relative">
-                  <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Search events..."
-                    className="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/50"
-                  />
-                </div>
-                <button
-                  onClick={() => setFilterOpen(!filterOpen)}
-                  className="flex items-center px-4 py-2 border rounded-lg hover:bg-gray-50"
-                >
-                  <Filter className="w-5 h-5 mr-2" />
-                  Filters
-                </button>
-              </div>
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => setView('grid')}
-                  className={`p-2 rounded-lg ${view === 'grid' ? 'bg-accent text-white' : 'text-gray-600 hover:bg-gray-100'}`}
-                >
-                  Grid
-                </button>
-                <button
-                  onClick={() => setView('list')}
-                  className={`p-2 rounded-lg ${view === 'list' ? 'bg-accent text-white' : 'text-gray-600 hover:bg-gray-100'}`}
-                >
-                  List
-                </button>
-              </div>
-            </div>
-
-            {/* Events Grid */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {events.map((event) => (
-                <EventCard key={event.id} event={event} />
-              ))}
-            </div>
-
-            {/* Pagination */}
-            <div className="mt-8 flex justify-center items-center space-x-2">
-              <button className="p-2 rounded-lg hover:bg-gray-100">
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-              <span className="px-4 py-2">Page 1 of 1</span>
-              <button className="p-2 rounded-lg hover:bg-gray-100">
-                <ChevronRight className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
+          {children}
         </div>
       </div>
     </div>
