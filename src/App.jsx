@@ -1,8 +1,8 @@
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { initializeApp } from 'firebase/app';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { createContext, useContext, useEffect, useState } from 'react';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from './config/firebase';
 
 // Existing imports
 import Navbar from './components/layout/Navbar';
@@ -17,19 +17,10 @@ import Events from './components/pages/Events';
 import PrivacyPolicy from './components/pages/PrivacyPolicy';
 import Contact from './components/pages/Contact';
 
-// New imports
-import Dashboard from '../src/pages/Dashboard.jsx';
+// Page imports
+import Dashboard from './components/pages/Dashboard';
 import Login from './components/pages/auth/Login';
 import SignUp from './components/pages/auth/SignUp';
-// Firebase configuration
-const firebaseConfig = {
-  // Add your Firebase config here
-  // You'll get this from your Firebase Console
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
 
 // Create Auth Context
 const AuthContext = createContext();
@@ -62,7 +53,11 @@ const ProtectedRoute = ({ children }) => {
   const location = useLocation();
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-accent"></div>
+      </div>
+    );
   }
 
   if (!user) {
@@ -101,6 +96,7 @@ function AppRoutes() {
   return (
     <AnimatePresence mode="wait" initial={false}>
       <Routes location={location} key={location.pathname}>
+        {/* Public Routes */}
         <Route index element={<HomePage />} />
         <Route path="features" element={<PageWrapper><Features /></PageWrapper>} />
         <Route path="analytics" element={<PageWrapper><Analytics /></PageWrapper>} />
@@ -119,7 +115,9 @@ function AppRoutes() {
         {/* Protected Dashboard Routes */}
         <Route path="dashboard/*" element={
           <ProtectedRoute>
-            <Dashboard />
+            <PageWrapper>
+              <Dashboard />
+            </PageWrapper>
           </ProtectedRoute>
         } />
 
