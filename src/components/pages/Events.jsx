@@ -1,11 +1,64 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Calendar, Clock, MapPin, Users, 
   Star, Bell, Mail, ChevronRight,
   Zap, Shield, Settings, Trophy
 } from 'lucide-react';
+import { db } from '../config/firebase';
+import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
 
 const Events = () => {
+  const [email, setEmail] = useState('');
+  const [status, setStatus] = useState('idle');
+  const [message, setMessage] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setStatus('loading');
+    setMessage('');
+
+    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+      setStatus('error');
+      setMessage('Please enter a valid email address');
+      return;
+    }
+
+    try {
+      const emailsRef = collection(db, 'emailSubscribers');
+      const q = query(emailsRef, where('email', '==', email));
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        setStatus('error');
+        setMessage('This email is already subscribed!');
+        return;
+      }
+
+      await addDoc(emailsRef, {
+        email,
+        source: 'events_page',
+        type: 'waitlist',
+        subscribed: true,
+        subscribedAt: new Date().toISOString(),
+        lastUpdated: new Date().toISOString(),
+        metadata: {
+          userAgent: window.navigator.userAgent,
+          language: window.navigator.language,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+        }
+      });
+
+      setStatus('success');
+      setMessage('Successfully joined the waitlist!');
+      setEmail('');
+    } catch (error) {
+      console.error('Error subscribing email:', error);
+      setStatus('error');
+      setMessage('An error occurred. Please try again later.');
+    }
+  };
+
   return (
     <div className="pt-20">
       {/* Hero Section */}
@@ -22,23 +75,40 @@ const Events = () => {
             <p className="text-xl text-gray-600 mb-8">
               Be among the first to experience our revolutionary track day event platform
             </p>
-            {/* Early Access Form */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
               className="max-w-md mx-auto"
             >
-              <div className="flex gap-4">
-                <input
-                  type="email"
-                  placeholder="Enter your email"
-                  className="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:border-accent"
-                />
-                <button className="px-6 py-3 bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors whitespace-nowrap">
-                  Get Early Access
-                </button>
-              </div>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="flex gap-4">
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter your email"
+                    className={`flex-1 px-4 py-3 rounded-lg border ${
+                      status === 'error' ? 'border-red-500' : 'border-gray-300'
+                    } focus:outline-none focus:border-accent`}
+                    disabled={status === 'loading' || status === 'success'}
+                  />
+                  <button
+                    type="submit"
+                    disabled={status === 'loading' || status === 'success'}
+                    className="px-6 py-3 bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors disabled:opacity-50 whitespace-nowrap"
+                  >
+                    {status === 'loading' ? 'Joining...' : 'Get Early Access'}
+                  </button>
+                </div>
+                {message && (
+                  <p className={`text-sm ${
+                    status === 'success' ? 'text-green-600' : 'text-red-500'
+                  }`}>
+                    {message}
+                  </p>
+                )}
+              </form>
               <p className="text-sm text-gray-500 mt-2">
                 Be notified when we launch events in your area
               </p>
@@ -47,6 +117,7 @@ const Events = () => {
         </div>
       </section>
 
+      {/* Rest of your existing Events.jsx content */}
       {/* Features Preview */}
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4">
@@ -91,7 +162,6 @@ const Events = () => {
           </div>
         </div>
       </section>
-
       {/* Host Preview */}
       <section className="py-16 bg-primary-dark text-white">
         <div className="max-w-7xl mx-auto px-4">
@@ -112,6 +182,9 @@ const Events = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className="px-6 py-3 bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors flex items-center"
+                  onClick={() => {
+                    document.querySelector('#host-signup')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
                 >
                   Register Interest
                   <ChevronRight className="w-5 h-5 ml-2" />
@@ -161,7 +234,7 @@ const Events = () => {
       </section>
 
       {/* Newsletter Section */}
-      <section className="py-16 bg-gray-50">
+      <section id="host-signup" className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -175,22 +248,47 @@ const Events = () => {
               Be the first to know when we launch in your area and receive exclusive early access offers
             </p>
             <div className="flex gap-4 max-w-md mx-auto">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:border-accent"
-              />
-              <button className="px-6 py-3 bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors">
-                Subscribe
-              </button>
+              <form onSubmit={handleSubmit} className="w-full space-y-4">
+                <div className="flex gap-4">
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter your email"
+                    className={`flex-1 px-4 py-3 rounded-lg border ${
+                      status === 'error' ? 'border-red-500' : 'border-gray-300'
+                    } focus:outline-none focus:border-accent`}
+                    disabled={status === 'loading' || status === 'success'}
+                  />
+                  <button
+                    type="submit"
+                    disabled={status === 'loading' || status === 'success'}
+                    className="px-6 py-3 bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors disabled:opacity-50"
+                  >
+                    {status === 'loading' ? (
+                      <span className="flex items-center">
+                        <span className="animate-spin h-5 w-5 mr-2 border-b-2 border-white rounded-full"/>
+                        Subscribing...
+                      </span>
+                    ) : (
+                      'Subscribe'
+                    )}
+                  </button>
+                </div>
+                {message && (
+                  <p className={`text-sm ${
+                    status === 'success' ? 'text-green-600' : 'text-red-500'
+                  }`}>
+                    {message}
+                  </p>
+                )}
+              </form>
             </div>
           </motion.div>
         </div>
       </section>
     </div>
   );
-  
 };
-
 
 export default Events;

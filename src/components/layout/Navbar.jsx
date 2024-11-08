@@ -1,14 +1,79 @@
-import { useState, useEffect } from 'react';
-import { Menu, X } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { Menu, X, User, LogOut, Settings, ChevronDown } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '../../App'; // Adjust path as needed
+import { auth } from '../../config/firebase';
 import logo from '@/assets/logo.png';
 
+const ProfileDropdown = ({ user, onLogout }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center space-x-2 text-gray-700 hover:text-accent"
+      >
+        <div className="w-8 h-8 bg-accent/10 rounded-full flex items-center justify-center">
+          {user.photoURL ? (
+            <img src={user.photoURL} alt="Profile" className="w-8 h-8 rounded-full" />
+          ) : (
+            <User className="w-5 h-5 text-accent" />
+          )}
+        </div>
+        <span className="font-medium">{user.displayName || 'User'}</span>
+        <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            className="absolute right-0 mt-2 w-48 py-2 bg-white rounded-lg shadow-xl border border-gray-100"
+          >
+            <Link
+              to="/dashboard/profile"
+              className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50"
+              onClick={() => setIsOpen(false)}
+            >
+              <Settings className="w-4 h-4 mr-2" />
+              Settings
+            </Link>
+            <button
+              onClick={onLogout}
+              className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-50"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Sign out
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -16,16 +81,22 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const handleLogout = async () => {
+    try {
+      await auth.signOut();
+      navigate('/');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
+
   const menuItems = [
-    // Main pages
     { name: 'Features', to: '/features' },
     { name: 'Analytics', to: '/analytics' },
     { name: 'Events', to: '/events' },
-    // Support pages
     { name: 'Contact', to: '/contact' },
     { name: 'Privacy', to: '/privacy' },
-    // Special button
-    { name: 'Download', to: '/#download', isButton: true, isHash: true }
+    // Auth/Dashboard links are handled separately
   ];
 
   const handleNavClick = (item) => {
@@ -62,9 +133,8 @@ const Navbar = () => {
               <img 
                 src={logo} 
                 alt="Chikane Logo" 
-                className="h-8 w-auto" // Adjust size as needed
+                className="h-8 w-auto"
               />
-              {/* Optionally keep text next to logo */}
               <span className="ml-2 text-2xl font-bold text-primary-dark">
                 Chikane
               </span>
@@ -79,28 +149,41 @@ const Navbar = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                {item.isHash ? (
-                  <button
-                    onClick={() => handleNavClick(item)}
-                    className={item.isButton ?
-                      "px-6 py-2 bg-accent text-white rounded-lg hover:bg-accent/90 transition-all" :
-                      "text-gray-600 hover:text-accent transition-colors"
-                    }
-                  >
-                    {item.name}
-                  </button>
-                ) : (
-                  <Link
-                    to={item.to}
-                    className={`text-gray-600 hover:text-accent transition-colors ${
-                      location.pathname === item.to ? 'text-accent' : ''
-                    }`}
-                  >
-                    {item.name}
-                  </Link>
-                )}
+                <Link
+                  to={item.to}
+                  className={`text-gray-600 hover:text-accent transition-colors ${
+                    location.pathname === item.to ? 'text-accent' : ''
+                  }`}
+                >
+                  {item.name}
+                </Link>
               </motion.div>
             ))}
+
+            {/* Auth Buttons or Profile Dropdown */}
+            {user ? (
+              <ProfileDropdown user={user} onLogout={handleLogout} />
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  className="text-gray-600 hover:text-accent transition-colors"
+                >
+                  Login
+                </Link>
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Link
+                    to="/signup"
+                    className="px-6 py-2 bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors"
+                  >
+                    Sign Up
+                  </Link>
+                </motion.div>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -130,28 +213,56 @@ const Navbar = () => {
                     whileHover={{ x: 10 }}
                     transition={{ duration: 0.2 }}
                   >
-                    {item.isHash ? (
-                      <button
-                        onClick={() => handleNavClick(item)}
-                        className={`block w-full text-left ${item.isButton ?
-                          "px-6 py-2 bg-accent text-white rounded-lg text-center" :
-                          "text-gray-600 hover:text-accent"}`}
-                      >
-                        {item.name}
-                      </button>
-                    ) : (
-                      <Link
-                        to={item.to}
-                        className={`block text-gray-600 hover:text-accent ${
-                          location.pathname === item.to ? 'text-accent' : ''
-                        }`}
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        {item.name}
-                      </Link>
-                    )}
+                    <Link
+                      to={item.to}
+                      className={`block text-gray-600 hover:text-accent ${
+                        location.pathname === item.to ? 'text-accent' : ''
+                      }`}
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      {item.name}
+                    </Link>
                   </motion.div>
                 ))}
+                
+                {/* Mobile Auth Links */}
+                {user ? (
+                  <>
+                    <Link
+                      to="/dashboard"
+                      className="block text-gray-600 hover:text-accent"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Dashboard
+                    </Link>
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setIsMenuOpen(false);
+                      }}
+                      className="block w-full text-left text-gray-600 hover:text-accent"
+                    >
+                      Sign out
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      to="/login"
+                      className="block text-gray-600 hover:text-accent"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Login
+                    </Link>
+                    <Link
+                      to="/signup"
+                      className="block px-6 py-2 bg-accent text-white rounded-lg text-center"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Sign Up
+                    </Link>
+                  </>
+                )}
               </div>
             </motion.div>
           )}

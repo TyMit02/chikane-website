@@ -1,33 +1,61 @@
 import { motion } from 'framer-motion';
-import { Calendar, Clock, MapPin, Users, Trophy, ArrowRight } from 'lucide-react';
+import { Calendar, Trophy, Users, Bell, Mail, ChevronRight } from 'lucide-react';
+import { useState } from 'react';
+import { db } from '../config/firebase';
+import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
 
 const EventsSection = () => {
-  const upcomingEvents = [
-    {
-      title: "Track Day Championship",
-      date: "March 15, 2024",
-      time: "9:00 AM - 5:00 PM",
-      location: "Silverstone Circuit",
-      participants: 24,
-      image: "/images/track-1.jpg" // Add appropriate image
-    },
-    {
-      title: "Endurance Racing Event",
-      date: "April 2, 2024",
-      time: "8:00 AM - 6:00 PM",
-      location: "Spa-Francorchamps",
-      participants: 32,
-      image: "/images/track-2.jpg" // Add appropriate image
-    },
-    {
-      title: "Sprint Series Final",
-      date: "April 20, 2024",
-      time: "10:00 AM - 4:00 PM",
-      location: "Nürburgring",
-      participants: 18,
-      image: "/images/track-3.jpg" // Add appropriate image
+  const [email, setEmail] = useState('');
+  const [status, setStatus] = useState('idle');
+  const [message, setMessage] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setStatus('loading');
+    setMessage('');
+
+    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+      setStatus('error');
+      setMessage('Please enter a valid email address');
+      return;
     }
-  ];
+
+    try {
+      // Check for existing email
+      const emailsRef = collection(db, 'emailSubscribers');
+      const q = query(emailsRef, where('email', '==', email));
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        setStatus('error');
+        setMessage('This email is already subscribed!');
+        return;
+      }
+
+      // Add new subscriber
+      await addDoc(emailsRef, {
+        email,
+        source: 'events_section',
+        type: 'waitlist',
+        subscribed: true,
+        subscribedAt: new Date().toISOString(),
+        lastUpdated: new Date().toISOString(),
+        metadata: {
+          userAgent: window.navigator.userAgent,
+          language: window.navigator.language,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+        }
+      });
+
+      setStatus('success');
+      setMessage('Successfully joined the waitlist!');
+      setEmail('');
+    } catch (error) {
+      console.error('Error subscribing email:', error);
+      setStatus('error');
+      setMessage('An error occurred. Please try again later.');
+    }
+  };
 
   return (
     <section id="events" className="py-24 bg-gradient-to-b from-white to-gray-50">
@@ -40,55 +68,90 @@ const EventsSection = () => {
           className="text-center mb-16"
         >
           <h2 className="text-4xl font-bold text-primary-dark mb-4">
-            Upcoming Events
+            Coming Soon
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Join our upcoming track days and racing events
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
+            Be among the first to experience our revolutionary track day platform
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-          {upcomingEvents.map((event, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow"
-            >
-              <div className="h-48 bg-gray-200 relative">
-                {/* Add actual event image here */}
-                <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent">
-                  <h3 className="text-xl font-bold text-white">
-                    {event.title}
-                  </h3>
-                </div>
+        <div className="max-w-3xl mx-auto mb-16">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="bg-white rounded-xl shadow-lg p-8"
+          >
+            <div className="grid md:grid-cols-2 gap-8 items-center">
+              <div>
+                <h3 className="text-xl font-bold mb-4">Early Access Benefits</h3>
+                <ul className="space-y-3">
+                  {[
+                    { icon: Calendar, text: "Priority Event Registration" },
+                    { icon: Trophy, text: "Exclusive Member Rates" },
+                    { icon: Users, text: "Community Access" },
+                    { icon: Bell, text: "Launch Notifications" }
+                  ].map((item, index) => (
+                    <li key={index} className="flex items-center text-gray-600">
+                      <item.icon className="w-5 h-5 mr-2 text-accent" />
+                      <span>{item.text}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <div className="p-6 space-y-4">
-                <div className="flex items-center text-gray-600">
-                  <Calendar className="w-5 h-5 mr-2" />
-                  <span>{event.date}</span>
+
+              <div className="space-y-6">
+                <div className="text-center md:text-left">
+                  <h4 className="font-semibold text-lg mb-2">Join the Waitlist</h4>
+                  <p className="text-gray-600 text-sm">
+                    Be first in line for upcoming track days
+                  </p>
                 </div>
-                <div className="flex items-center text-gray-600">
-                  <Clock className="w-5 h-5 mr-2" />
-                  <span>{event.time}</span>
-                </div>
-                <div className="flex items-center text-gray-600">
-                  <MapPin className="w-5 h-5 mr-2" />
-                  <span>{event.location}</span>
-                </div>
-                <div className="flex items-center text-gray-600">
-                  <Users className="w-5 h-5 mr-2" />
-                  <span>{event.participants} Participants</span>
-                </div>
-                <button className="w-full px-6 py-2 mt-4 bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors flex items-center justify-center">
-                  Register Now
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </button>
+
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Enter your email"
+                      className={`w-full px-4 py-3 rounded-lg border ${
+                        status === 'error' ? 'border-red-500' : 'border-gray-300'
+                      } focus:outline-none focus:border-accent`}
+                      disabled={status === 'loading' || status === 'success'}
+                    />
+                    {message && (
+                      <p className={`mt-2 text-sm ${
+                        status === 'success' ? 'text-green-600' : 'text-red-500'
+                      }`}>
+                        {message}
+                      </p>
+                    )}
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={status === 'loading' || status === 'success'}
+                    className="w-full px-6 py-3 bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors disabled:opacity-50 flex items-center justify-center"
+                  >
+                    {status === 'loading' ? (
+                      <span className="flex items-center">
+                        <span className="animate-spin h-5 w-5 mr-2 border-b-2 border-white rounded-full"/>
+                        Joining...
+                      </span>
+                    ) : status === 'success' ? (
+                      'Successfully Joined!'
+                    ) : (
+                      <span className="flex items-center">
+                        Join Waitlist
+                        <ChevronRight className="w-5 h-5 ml-2" />
+                      </span>
+                    )}
+                  </button>
+                </form>
               </div>
-            </motion.div>
-          ))}
+            </div>
+          </motion.div>
         </div>
 
         <motion.div
