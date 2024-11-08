@@ -49,7 +49,7 @@ const ProfileDropdown = ({ user, onLogout }) => {
               onClick={() => setIsOpen(false)}
             >
               <Settings className="w-4 h-4 mr-2" />
-              Settings
+              Dashboard
             </Link>
             <button
               onClick={onLogout}

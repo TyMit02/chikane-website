@@ -113,13 +113,17 @@ function AppRoutes() {
         } />
 
         {/* Protected Dashboard Routes */}
-        <Route path="dashboard/*" element={
-          <ProtectedRoute>
-            <PageWrapper>
+        <Route 
+          path="/dashboard/*" 
+          element={
+            <ProtectedRoute>
+              <PageWrapper>
               <Dashboard />
-            </PageWrapper>
-          </ProtectedRoute>
-        } />
+              </PageWrapper>
+            </ProtectedRoute>
+          } 
+        />
+
 
         {/* 404 Route */}
         <Route path="*" element={
