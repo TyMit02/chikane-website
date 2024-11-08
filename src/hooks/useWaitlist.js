@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { db } from '@/config/firebase';
 import { validateEmail } from '../utils/validation';
 import { trackEvent } from '../utils/analytics';
 

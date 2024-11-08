@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { Calendar, Trophy, Users, Bell, Mail, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
-import { db } from '../config/firebase';
+import { db } from '@/config/firebase';
 import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
 
 const EventsSection = () => {

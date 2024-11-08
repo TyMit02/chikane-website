@@ -1,5 +1,5 @@
 import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { db } from '@/config/firebase';
 
 export class EmailService {
   static async subscribeEmail(email, source = 'events_page') {

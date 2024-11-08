@@ -1,5 +1,5 @@
 import { getAnalytics, logEvent } from 'firebase/analytics';
-import { db } from '../config/firebase';
+import { db } from '@/config/firebase';
 import { collection, addDoc, getDocs, query, where, Timestamp } from 'firebase/firestore';
 
 export class AnalyticsService {
