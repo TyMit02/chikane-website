@@ -13,45 +13,38 @@ const EventsSection = () => {
     e.preventDefault();
     setStatus('loading');
     setMessage('');
-
+  
     if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
       setStatus('error');
       setMessage('Please enter a valid email address');
       return;
     }
-
+  
     try {
-      // Check for existing email
+      // Check if email exists
       const emailsRef = collection(db, 'emailSubscribers');
       const q = query(emailsRef, where('email', '==', email));
       const querySnapshot = await getDocs(q);
-
+  
       if (!querySnapshot.empty) {
         setStatus('error');
         setMessage('This email is already subscribed!');
         return;
       }
-
-      // Add new subscriber
-      await addDoc(emailsRef, {
+  
+      // Add new subscription
+      await addDoc(collection(db, 'emailSubscribers'), {
         email,
-        source: 'events_section',
-        type: 'waitlist',
-        subscribed: true,
         subscribedAt: new Date().toISOString(),
-        lastUpdated: new Date().toISOString(),
-        metadata: {
-          userAgent: window.navigator.userAgent,
-          language: window.navigator.language,
-          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
-        }
+        source: 'website',
+        status: 'active'
       });
-
+  
       setStatus('success');
-      setMessage('Successfully joined the waitlist!');
+      setMessage('Successfully subscribed!');
       setEmail('');
     } catch (error) {
-      console.error('Error subscribing email:', error);
+      console.error('Subscription error:', error);
       setStatus('error');
       setMessage('An error occurred. Please try again later.');
     }
