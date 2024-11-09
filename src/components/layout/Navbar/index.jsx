@@ -1,14 +1,75 @@
-import { useState, useEffect } from 'react';
-import { Menu, X } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Menu, X, User, LogOut, Settings, ChevronDown } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from '../../../App'; // Updated path
-import { auth } from '../../../config/firebase'; // Updated path
+import { useAuth } from '../../../App';
+import { auth } from '../../../config/firebase';
 import logo from '@/assets/logo.png';
 
-// Import the separated components
-import AuthButtons from './components/AuthButtons';
-import ProfileDropdown from './components/ProfileDropdown';
+const ProfileDropdown = ({ user, onLogout }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center space-x-2 text-gray-700 hover:text-accent"
+      >
+        <div className="w-8 h-8 bg-accent/10 rounded-full flex items-center justify-center">
+          {user?.photoURL ? (
+            <img src={user.photoURL} alt="Profile" className="w-8 h-8 rounded-full" />
+          ) : (
+            <User className="w-5 h-5 text-accent" />
+          )}
+        </div>
+        <span className="font-medium">{user?.displayName || 'User'}</span>
+        <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            className="absolute right-0 mt-2 w-48 py-2 bg-white rounded-lg shadow-xl border border-gray-100"
+          >
+            <Link
+              to="/dashboard"
+              className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50"
+              onClick={() => setIsOpen(false)}
+            >
+              <Settings className="w-4 h-4 mr-2" />
+              Dashboard
+            </Link>
+            <button
+              onClick={() => {
+                onLogout();
+                setIsOpen(false);
+              }}
+              className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-50"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Sign out
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -16,11 +77,6 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
-
-  // Hide navbar on dashboard pages
-  if (location.pathname.startsWith('/dashboard')) {
-    return null;
-  }
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -37,6 +93,11 @@ const Navbar = () => {
     }
   };
 
+  // Move dashboard check after hooks
+  if (location.pathname.startsWith('/dashboard')) {
+    return null;
+  }
+
   const menuItems = [
     { name: 'Features', to: '/features' },
     { name: 'Analytics', to: '/analytics' },
@@ -44,21 +105,6 @@ const Navbar = () => {
     { name: 'Contact', to: '/contact' },
     { name: 'Privacy', to: '/privacy' },
   ];
-
-  const handleNavClick = (item) => {
-    if (item.isHash) {
-      if (location.pathname !== '/') {
-        window.location.href = item.to;
-        return;
-      }
-      
-      const element = document.querySelector(item.to.replace('/', ''));
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
-      }
-    }
-    setIsMenuOpen(false);
-  };
 
   return (
     <motion.nav
@@ -106,11 +152,28 @@ const Navbar = () => {
               </motion.div>
             ))}
 
-            {/* Auth Buttons or Profile Dropdown */}
             {user ? (
               <ProfileDropdown user={user} onLogout={handleLogout} />
             ) : (
-              <AuthButtons location={location} />
+              <>
+                <Link
+                  to="/login"
+                  className="text-gray-600 hover:text-accent transition-colors"
+                >
+                  Login
+                </Link>
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Link
+                    to="/signup"
+                    className="px-6 py-2 bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors"
+                  >
+                    Sign Up
+                  </Link>
+                </motion.div>
+              </>
             )}
           </div>
 
@@ -153,7 +216,6 @@ const Navbar = () => {
                   </motion.div>
                 ))}
                 
-                {/* Mobile Auth Links */}
                 {user ? (
                   <>
                     <Link
@@ -174,7 +236,22 @@ const Navbar = () => {
                     </button>
                   </>
                 ) : (
-                  <AuthButtons location={location} />
+                  <>
+                    <Link
+                      to="/login"
+                      className="block text-gray-600 hover:text-accent"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Login
+                    </Link>
+                    <Link
+                      to="/signup"
+                      className="block px-6 py-2 bg-accent text-white rounded-lg text-center"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Sign Up
+                    </Link>
+                  </>
                 )}
               </div>
             </motion.div>

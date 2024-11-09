@@ -1,65 +1,12 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate, Navigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Calendar, Users, Clock, Settings, Bell, Filter,
   Plus, Search, ChevronLeft, ChevronRight, Timer,
   BarChart2, Camera, User
 } from 'lucide-react';
-
-// Event Status Badge Component
-const EventStatusBadge = ({ status }) => {
-  const statusStyles = {
-    draft: 'bg-gray-100 text-gray-600',
-    published: 'bg-blue-100 text-blue-600',
-    registration_open: 'bg-green-100 text-green-600',
-    registration_closed: 'bg-yellow-100 text-yellow-600',
-    in_progress: 'bg-purple-100 text-purple-600',
-    completed: 'bg-gray-100 text-gray-600'
-  };
-
-  return (
-    <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusStyles[status]}`}>
-      {status.replace('_', ' ').charAt(0).toUpperCase() + status.slice(1)}
-    </span>
-  );
-};
-
-// Event Card Component
-const EventCard = ({ event }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow"
-  >
-    <div className="flex justify-between items-start mb-4">
-      <h3 className="text-xl font-semibold">{event.name}</h3>
-      <EventStatusBadge status={event.status} />
-    </div>
-    <div className="space-y-2 text-gray-600">
-      <div className="flex items-center">
-        <Calendar className="w-5 h-5 mr-2" />
-        <span>{new Date(event.date.start).toLocaleDateString()}</span>
-      </div>
-      <div className="flex items-center">
-        <Users className="w-5 h-5 mr-2" />
-        <span>{event.participants.length} / {event.limits.totalParticipants} Participants</span>
-      </div>
-      <div className="flex items-center">
-        <Clock className="w-5 h-5 mr-2" />
-        <span>{event.runGroups.length} Run Groups</span>
-      </div>
-    </div>
-    <div className="mt-4 pt-4 border-t flex justify-end">
-      <Link 
-        to={`/dashboard/events/${event.id}`}
-        className="px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors"
-      >
-        Manage Event
-      </Link>
-    </div>
-  </motion.div>
-);
+import { useAuth } from '../../App';
 
 // Navigation Item Component
 const NavItem = ({ icon: Icon, label, path, collapsed }) => {
@@ -81,12 +28,48 @@ const NavItem = ({ icon: Icon, label, path, collapsed }) => {
   );
 };
 
-// Dashboard Layout Component
+// User Profile Component
+const UserProfile = ({ user }) => (
+  <div className="p-4 border-t">
+    <div className="flex items-center gap-3">
+      <div className="w-10 h-10 bg-accent/10 rounded-full flex items-center justify-center">
+        {user?.photoURL ? (
+          <img src={user.photoURL} alt="Profile" className="w-10 h-10 rounded-full" />
+        ) : (
+          <User className="w-6 h-6 text-accent" />
+        )}
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium text-gray-900 truncate">
+          {user?.displayName || 'User'}
+        </p>
+        <p className="text-xs text-gray-500 truncate">
+          {user?.email || 'No email'}
+        </p>
+      </div>
+    </div>
+  </div>
+);
+
 const DashboardLayout = ({ children }) => {
+  const { user, loading } = useAuth();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [view, setView] = useState('grid');
-  const [filterOpen, setFilterOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+
+  // Show loading spinner while auth state is being determined
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-accent"></div>
+      </div>
+    );
+  }
+
+  // Redirect to login if no user
+  if (!user) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
 
   const menuItems = [
     { icon: Calendar, label: 'Events', path: '/dashboard/events' },
@@ -97,26 +80,17 @@ const DashboardLayout = ({ children }) => {
     { icon: Settings, label: 'Settings', path: '/dashboard/settings' },
   ];
 
-  // Placeholder events data
-  const events = [
-    {
-      id: 1,
-      name: "Summer Track Day",
-      status: "registration_open",
-      date: { start: new Date("2024-07-15") },
-      participants: new Array(15),
-      limits: { totalParticipants: 30 },
-      runGroups: new Array(3),
-    },
-    // Add more sample events as needed
-  ];
+  const currentSection = menuItems.find(item => 
+    location.pathname.startsWith(item.path))?.label || 'Dashboard';
 
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
-      <div className={`bg-white shadow-lg transition-all duration-300 ${
-        sidebarCollapsed ? 'w-16' : 'w-64'
-      }`}>
+      <motion.div 
+        initial={false}
+        animate={{ width: sidebarCollapsed ? '4rem' : '16rem' }}
+        className="bg-white shadow-lg flex flex-col"
+      >
         {/* Logo */}
         <div className="flex h-16 items-center justify-between px-4 border-b">
           {!sidebarCollapsed && (
@@ -126,47 +100,68 @@ const DashboardLayout = ({ children }) => {
           )}
           <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="p-2 rounded-lg hover:bg-gray-100"
+            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
           >
             {sidebarCollapsed ? <ChevronRight /> : <ChevronLeft />}
           </button>
         </div>
 
         {/* Navigation */}
-        <nav className="p-4">
-          {menuItems.map((item) => (
-            <NavItem
-              key={item.label}
-              {...item}
-              collapsed={sidebarCollapsed}
-            />
-          ))}
-        </nav>
-      </div>
+        <div className="flex-1 flex flex-col justify-between py-4">
+          <nav className="space-y-1 px-2">
+            {menuItems.map((item) => (
+              <NavItem
+                key={item.label}
+                {...item}
+                collapsed={sidebarCollapsed}
+              />
+            ))}
+          </nav>
+
+          {/* User Profile */}
+          {!sidebarCollapsed && <UserProfile user={user} />}
+        </div>
+      </motion.div>
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
         <header className="h-16 bg-white shadow-sm flex items-center justify-between px-6">
-          <h1 className="text-xl font-semibold text-gray-800">
-            {menuItems.find(item => 
-              location.pathname.startsWith(item.path))?.label || 'Dashboard'}
-          </h1>
+          <div className="flex items-center">
+            <h1 className="text-xl font-semibold text-gray-800">
+              {currentSection}
+            </h1>
+          </div>
           <div className="flex items-center gap-4">
             <button className="p-2 rounded-lg hover:bg-gray-100 relative">
               <Bell size={20} />
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
             </button>
-            <div className="w-8 h-8 bg-accent/10 rounded-full flex items-center justify-center">
+            <motion.div 
+              whileHover={{ scale: 1.05 }}
+              className="w-8 h-8 bg-accent/10 rounded-full flex items-center justify-center md:hidden"
+            >
               <User className="w-5 h-5 text-accent" />
-            </div>
+            </motion.div>
           </div>
         </header>
 
         {/* Main Content Area */}
-        <div className="flex-1 overflow-auto">
-          {children}
-        </div>
+        <main className="flex-1 overflow-auto bg-gray-50">
+          <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={location.pathname}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.2 }}
+              >
+                {children}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </main>
       </div>
     </div>
   );

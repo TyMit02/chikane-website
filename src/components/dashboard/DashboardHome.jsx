@@ -1,50 +1,53 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Search, Filter } from 'lucide-react';
-import EventCard from './EventCard';
+import { Plus } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const DashboardHome = () => {
-  const [view, setView] = useState('grid');
-  const [filterOpen, setFilterOpen] = useState(false);
-
-  // Placeholder events data
-  const events = [
-    {
-      id: 1,
-      name: "Summer Track Day",
-      status: "registration_open",
-      date: { start: new Date("2024-07-15") },
-      participants: new Array(15),
-      limits: { totalParticipants: 30 },
-      runGroups: new Array(3),
-    },
-  ];
-
   return (
-    <div className="p-6">
-      {/* Event Management Header */}
-      <div className="bg-white shadow-sm rounded-lg mb-6">
-        <div className="p-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">Event Management</h2>
-              <p className="text-gray-600">Manage your track day events</p>
-            </div>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              className="flex items-center px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors"
-            >
-              <Plus className="w-5 h-5 mr-2" />
-              Create Event
-            </motion.button>
+    <div className="space-y-6">
+      {/* Welcome Section */}
+      <div className="bg-white rounded-lg shadow p-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Welcome to Dashboard</h2>
+            <p className="mt-1 text-sm text-gray-500">Manage your track day events and participants</p>
           </div>
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Link
+              to="/dashboard/events/new"
+              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-accent hover:bg-accent/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent"
+            >
+              <Plus className="mr-2 h-5 w-5" />
+              Create Event
+            </Link>
+          </motion.div>
         </div>
       </div>
 
-      {/* Events Grid */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {events.map((event) => (
-          <EventCard key={event.id} event={event} />
+      {/* Quick Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {[
+          { title: 'Total Events', value: '12', change: '+2 this month' },
+          { title: 'Active Participants', value: '145', change: '+15 this week' },
+          { title: 'Upcoming Events', value: '3', change: 'Next 30 days' },
+        ].map((stat, index) => (
+          <motion.div
+            key={stat.title}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1 }}
+            className="bg-white rounded-lg shadow p-6"
+          >
+            <h3 className="text-sm font-medium text-gray-500">{stat.title}</h3>
+            <p className="mt-2 flex items-baseline">
+              <span className="text-3xl font-semibold text-gray-900">{stat.value}</span>
+              <span className="ml-2 text-sm font-medium text-gray-500">{stat.change}</span>
+            </p>
+          </motion.div>
         ))}
       </div>
     </div>
