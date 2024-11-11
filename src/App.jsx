@@ -6,19 +6,19 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './config/firebase';
 
 // Layout Components
-import Navbar from './components/layout/Navbar';
-import Footer from './components/layout/Footer';
-import DashboardLayout from './components/layout/DashboardLayout';
+import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 
 // Page Components
-import HomePage from './components/pages/HomePage';
-import Features from './components/pages/Features';
-import Analytics from './components/pages/Analytics';
-import Events from './components/pages/Events';
-import PrivacyPolicy from './components/pages/PrivacyPolicy';
-import Contact from './components/pages/Contact';
-import Login from './pages/auth/Login';
-import SignUp from './pages/auth/SignUp';
+import HomePage from '@/components/pages/HomePage';
+import Features from '@/components/pages/Features';
+import Analytics from '@/components/pages/Analytics';
+import Events from '@/components/pages/Events';
+import PrivacyPolicy from '@/components/pages/PrivacyPolicy';
+import Contact from '@/components/pages/Contact';
+import Login from '@/pages/auth/Login';
+import SignUp from '@/pages/auth/SignUp';
 
 // Dashboard Components
 import DashboardHome from '@/components/dashboard/DashboardHome';
