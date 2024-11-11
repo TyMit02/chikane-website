@@ -3,6 +3,7 @@ import { Calendar, Trophy, Users, Bell, Mail, ChevronRight } from 'lucide-react'
 import { useState } from 'react';
 import { db } from '@/config/firebase';
 import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
+import { supabase } from '@/lib/supabase'
 
 const EventsSection = () => {
   const [email, setEmail] = useState('');
@@ -21,30 +22,42 @@ const EventsSection = () => {
     }
   
     try {
-      // Check if email exists
-      const emailsRef = collection(db, 'emailSubscribers');
-      const q = query(emailsRef, where('email', '==', email));
-      const querySnapshot = await getDocs(q);
+      // Check if email already exists
+      const { data: existingEmail } = await supabase
+        .from('email_subscribers')
+        .select('email')
+        .eq('email', email)
+        .single();
   
-      if (!querySnapshot.empty) {
+      if (existingEmail) {
         setStatus('error');
         setMessage('This email is already subscribed!');
         return;
       }
   
       // Add new subscription
-      await addDoc(collection(db, 'emailSubscribers'), {
-        email,
-        subscribedAt: new Date().toISOString(),
-        source: 'website',
-        status: 'active'
-      });
+      const { error } = await supabase
+        .from('email_subscribers')
+        .insert([
+          {
+            email,
+            source: 'events_page',
+            type: 'waitlist',
+            metadata: {
+              userAgent: window.navigator.userAgent,
+              language: window.navigator.language,
+              timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+            }
+          }
+        ]);
+  
+      if (error) throw error;
   
       setStatus('success');
-      setMessage('Successfully subscribed!');
+      setMessage('Successfully joined the waitlist!');
       setEmail('');
     } catch (error) {
-      console.error('Subscription error:', error);
+      console.error('Error subscribing email:', error);
       setStatus('error');
       setMessage('An error occurred. Please try again later.');
     }

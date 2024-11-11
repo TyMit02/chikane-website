@@ -1,8 +1,7 @@
-// src/config/firebase.js
-
-import { initializeApp } from 'firebase/app';
+import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 
 // Your Firebase config
 const firebaseConfig = {
@@ -15,19 +14,12 @@ const firebaseConfig = {
   measurementId: "G-8SZW1DJZG6"
 };
 
-// Initialize Firebase only once
-let app;
-try {
-  app = initializeApp(firebaseConfig);
-} catch (error) {
-  if (error.code !== 'app/duplicate-app') {
-    console.error('Firebase initialization error:', error);
-  }
-  app = getApp(); // If already initialized, use that one
-}
+// Initialize Firebase
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
-// Export auth and db instances
+// Initialize services
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+export const storage = getStorage(app);
 
 export default app;

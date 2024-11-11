@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useLocation, useNavigate, Navigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate, Navigate, Outlet } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Calendar, Users, Clock, Settings, Bell, Filter,
@@ -51,13 +51,13 @@ const UserProfile = ({ user }) => (
   </div>
 );
 
-const DashboardLayout = ({ children }) => {
+const DashboardLayout = () => {  // Removed children prop
+  console.log("DashboardLayout rendering"); // Add this line
+
   const { user, loading } = useAuth();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const location = useLocation();
-  const navigate = useNavigate();
 
-  // Show loading spinner while auth state is being determined
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -66,7 +66,6 @@ const DashboardLayout = ({ children }) => {
     );
   }
 
-  // Redirect to login if no user
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
@@ -157,7 +156,7 @@ const DashboardLayout = ({ children }) => {
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.2 }}
               >
-                {children}
+                <Outlet /> {/* This is the key change */}
               </motion.div>
             </AnimatePresence>
           </div>

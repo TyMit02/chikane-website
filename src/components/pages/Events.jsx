@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { db } from '@/config/firebase';
 import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
+import { supabase } from '@/lib/supabase'
 
 const Events = () => {
   const [email, setEmail] = useState('');
@@ -17,38 +18,45 @@ const Events = () => {
     e.preventDefault();
     setStatus('loading');
     setMessage('');
-
+  
     if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
       setStatus('error');
       setMessage('Please enter a valid email address');
       return;
     }
-
+  
     try {
-      const emailsRef = collection(db, 'emailSubscribers');
-      const q = query(emailsRef, where('email', '==', email));
-      const querySnapshot = await getDocs(q);
-
-      if (!querySnapshot.empty) {
+      // Check if email already exists
+      const { data: existingEmail } = await supabase
+        .from('email_subscribers')
+        .select('email')
+        .eq('email', email)
+        .single();
+  
+      if (existingEmail) {
         setStatus('error');
         setMessage('This email is already subscribed!');
         return;
       }
-
-      await addDoc(emailsRef, {
-        email,
-        source: 'events_page',
-        type: 'waitlist',
-        subscribed: true,
-        subscribedAt: new Date().toISOString(),
-        lastUpdated: new Date().toISOString(),
-        metadata: {
-          userAgent: window.navigator.userAgent,
-          language: window.navigator.language,
-          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
-        }
-      });
-
+  
+      // Add new subscription
+      const { error } = await supabase
+        .from('email_subscribers')
+        .insert([
+          {
+            email,
+            source: 'events_page',
+            type: 'waitlist',
+            metadata: {
+              userAgent: window.navigator.userAgent,
+              language: window.navigator.language,
+              timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+            }
+          }
+        ]);
+  
+      if (error) throw error;
+  
       setStatus('success');
       setMessage('Successfully joined the waitlist!');
       setEmail('');

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import EventCreationStepper from './EventCreationStepper';
 import BasicDetails from './steps/BasicDetails';
@@ -9,10 +9,44 @@ import RegistrationSettings from './steps/RegistrationSettings';
 import Schedule from './steps/Schedule';
 import DocumentsRules from './steps/DocumentsRules';
 import ReviewPublish from './steps/ReviewPublish';
+import { useParams, useNavigate } from 'react-router-dom';
+import { getEvent } from '@/services/eventService';
 
 const EventCreation = () => {
   const [currentStep, setCurrentStep] = useState('basics');
   const [completedSteps, setCompletedSteps] = useState([]);
+  const { eventId } = useParams(); // For editing existing events
+  const [loading, setLoading] = useState(false);
+  
+  
+  useEffect(() => {
+    if (eventId) {
+      loadEvent();
+    }
+  }, [eventId]);
+
+  const loadEvent = async () => {
+    setLoading(true);
+    try {
+      const eventData = await getEvent(eventId);
+      if (eventData) {
+        setFormData(eventData);
+        // Set completed steps based on filled data
+        const completed = [];
+        if (eventData.basics.name) completed.push('basics');
+        if (eventData.requirements.insurance.required || eventData.requirements.equipment.length > 0) {
+          completed.push('requirements');
+        }
+        // Add other step completions...
+        setCompletedSteps(completed);
+      }
+    } catch (error) {
+      console.error('Error loading event:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const [formData, setFormData] = useState({
     basics: {
       name: '',

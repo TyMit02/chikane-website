@@ -1,14 +1,63 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { 
   CheckCircle, AlertCircle, Calendar, MapPin,
   Users, Clock, FileText, ChevronDown, ChevronUp,
-  Shield, Wrench, Map
+  Shield, Wrench, Map, Loader
 } from 'lucide-react';
+import { createEvent, updateEvent } from '@/services/eventService';
+import PropTypes from 'prop-types';
 
-const ReviewPublish = ({ data, onUpdate, onNext, onBack }) => {
+// Helper function for date formatting
+const formatDate = (date) => {
+  if (!date) return 'Not set';
+  return new Date(date).toLocaleString('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit'
+  });
+};
+
+// Default data structure
+const defaultData = {
+  basics: {
+    name: '',
+    eventType: '',
+    track: '',
+    trackConfiguration: '',
+    participantLimit: 0
+  },
+  requirements: {
+    insurance: { required: false, details: '' },
+    sound: { required: false, limit: '', details: '' },
+    equipment: []
+  },
+  groups: [],
+  registration: {
+    openDate: null,
+    closeDate: null,
+    pricing: { regular: '', earlyBird: '' }
+  },
+  schedule: {
+    sessions: []
+  },
+  documents: {
+    supplementaryRules: [],
+    trackMaps: [],
+    waivers: [],
+    techForms: []
+  }
+};
+
+const ReviewPublish = ({ data = defaultData, onUpdate, onNext, onBack }) => {
   const [expandedSections, setExpandedSections] = useState(['basics']);
-  const [publishStatus, setPublishStatus] = useState('draft'); // draft, scheduled, published
+  const [publishStatus, setPublishStatus] = useState('draft');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   const toggleSection = (section) => {
     setExpandedSections(prev => 
@@ -18,21 +67,48 @@ const ReviewPublish = ({ data, onUpdate, onNext, onBack }) => {
     );
   };
 
-  const handleSubmit = (e) => {
+  const handlePublish = async (e) => {
     e.preventDefault();
-    onNext();
+    setLoading(true);
+    setError(null);
+
+    try {
+      let result;
+      const eventData = {
+        ...data,
+        status: publishStatus,
+        organizerId: 'current-user-id', // Replace with actual user ID from auth context
+        updatedAt: new Date().toISOString()
+      };
+
+      if (data.id) {
+        result = await updateEvent(data.id, eventData);
+      } else {
+        result = await createEvent(eventData);
+      }
+
+      switch (publishStatus) {
+        case 'published':
+          navigate(`/dashboard/events/${result.id}`);
+          break;
+        case 'draft':
+          navigate('/dashboard/events/drafts');
+          break;
+        case 'scheduled':
+          navigate('/dashboard/events/scheduled');
+          break;
+        default:
+          navigate('/dashboard/events');
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to publish event');
+      console.error('Publish error:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const formatDate = (date) => {
-    return new Date(date).toLocaleString('en-US', {
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit'
-    });
-  };
-
+  // Section component for each expandable section
   const Section = ({ title, id, icon: Icon, children }) => {
     const isExpanded = expandedSections.includes(id);
     
@@ -59,7 +135,7 @@ const ReviewPublish = ({ data, onUpdate, onNext, onBack }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
+    <form onSubmit={handlePublish} className="space-y-8">
       {/* Header */}
       <div className="bg-white rounded-lg p-6">
         <div className="flex items-center justify-between">
@@ -74,6 +150,7 @@ const ReviewPublish = ({ data, onUpdate, onNext, onBack }) => {
               value={publishStatus}
               onChange={(e) => setPublishStatus(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/50"
+              disabled={loading}
             >
               <option value="draft">Save as Draft</option>
               <option value="scheduled">Schedule Publish</option>
@@ -90,21 +167,23 @@ const ReviewPublish = ({ data, onUpdate, onNext, onBack }) => {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700">Event Name</label>
-              <p className="mt-1 text-sm text-gray-900">{data.basics.name}</p>
+              <p className="mt-1 text-sm text-gray-900">{data.basics.name || 'Not set'}</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Event Type</label>
-              <p className="mt-1 text-sm text-gray-900">{data.basics.eventType}</p>
+              <p className="mt-1 text-sm text-gray-900">{data.basics.eventType || 'Not set'}</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Location</label>
               <p className="mt-1 text-sm text-gray-900">
-                {data.basics.track} - {data.basics.trackConfiguration}
+                {data.basics.track} {data.basics.trackConfiguration ? `- ${data.basics.trackConfiguration}` : ''}
               </p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Participant Limit</label>
-              <p className="mt-1 text-sm text-gray-900">{data.basics.participantLimit} participants</p>
+              <p className="mt-1 text-sm text-gray-900">
+                {data.basics.participantLimit ? `${data.basics.participantLimit} participants` : 'Not set'}
+              </p>
             </div>
           </div>
         </Section>
@@ -134,31 +213,40 @@ const ReviewPublish = ({ data, onUpdate, onNext, onBack }) => {
                 </ul>
               </div>
             )}
+            {!data.requirements.insurance.required && 
+             !data.requirements.sound.required && 
+             data.requirements.equipment.length === 0 && (
+              <p className="text-sm text-gray-500">No requirements set</p>
+            )}
           </div>
         </Section>
 
         {/* Run Groups */}
         <Section title="Run Groups" id="groups" icon={Users}>
           <div className="space-y-4">
-            {data.groups.map(group => (
-              <div
-                key={group.id}
-                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-              >
-                <div className="flex items-center space-x-3">
-                  <div
-                    className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: group.color }}
-                  />
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">{group.name}</p>
-                    <p className="text-xs text-gray-500">
-                      {group.maxParticipants} participants • {group.sessionDuration} min sessions
-                    </p>
+            {data.groups.length > 0 ? (
+              data.groups.map(group => (
+                <div
+                  key={group.id}
+                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                >
+                  <div className="flex items-center space-x-3">
+                    <div
+                      className="w-3 h-3 rounded-full"
+                      style={{ backgroundColor: group.color }}
+                    />
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">{group.name}</p>
+                      <p className="text-xs text-gray-500">
+                        {group.maxParticipants} participants • {group.sessionDuration} min sessions
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="text-sm text-gray-500">No run groups defined</p>
+            )}
           </div>
         </Section>
 
@@ -175,7 +263,7 @@ const ReviewPublish = ({ data, onUpdate, onNext, onBack }) => {
             <div>
               <label className="block text-sm font-medium text-gray-700">Pricing</label>
               <p className="mt-1 text-sm text-gray-900">
-                Regular: ${data.registration.pricing.regular}<br />
+                Regular: ${data.registration.pricing.regular || '0'}<br />
                 {data.registration.pricing.earlyBird && 
                   `Early Bird: $${data.registration.pricing.earlyBird}`
                 }
@@ -187,33 +275,37 @@ const ReviewPublish = ({ data, onUpdate, onNext, onBack }) => {
         {/* Schedule */}
         <Section title="Schedule" id="schedule" icon={Clock}>
           <div className="space-y-4">
-            {data.schedule.sessions.map((session, index) => (
-              <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div>
-                  <p className="text-sm font-medium text-gray-900">{session.title}</p>
-                  <p className="text-xs text-gray-500">
-                    {formatDate(session.startTime)} • {session.duration} minutes
-                  </p>
+            {data.schedule.sessions.length > 0 ? (
+              data.schedule.sessions.map((session, index) => (
+                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">{session.title}</p>
+                    <p className="text-xs text-gray-500">
+                      {formatDate(session.startTime)} • {session.duration} minutes
+                    </p>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    {session.groups?.map(groupId => {
+                      const group = data.groups.find(g => g.id === groupId);
+                      return group ? (
+                        <span
+                          key={groupId}
+                          className="inline-flex items-center px-2 py-0.5 text-xs rounded-full"
+                          style={{
+                            backgroundColor: `${group.color}20`,
+                            color: group.color
+                          }}
+                        >
+                          {group.name}
+                        </span>
+                      ) : null;
+                    })}
+                  </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  {session.groups.map(groupId => {
-                    const group = data.groups.find(g => g.id === groupId);
-                    return group ? (
-                      <span
-                        key={groupId}
-                        className="inline-flex items-center px-2 py-0.5 text-xs rounded-full"
-                        style={{
-                          backgroundColor: `${group.color}20`,
-                          color: group.color
-                        }}
-                      >
-                        {group.name}
-                      </span>
-                    ) : null;
-                  })}
-                </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="text-sm text-gray-500">No sessions scheduled</p>
+            )}
           </div>
         </Section>
 
@@ -250,33 +342,116 @@ const ReviewPublish = ({ data, onUpdate, onNext, onBack }) => {
         </Section>
       </div>
 
+      {/* Error Message */}
+      {error && (
+        <div className="bg-red-50 rounded-lg p-4">
+          <p className="text-sm text-red-600 flex items-center">
+            <AlertCircle className="w-4 h-4 mr-2" />
+            {error}
+          </p>
+        </div>
+      )}
+
       {/* Form Actions */}
       <div className="flex justify-between pt-6 border-t">
         <button
           type="button"
           onClick={onBack}
-          className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          disabled={loading}
+          className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
         >
           Back
         </button>
         <div className="space-x-4">
           <button
             type="button"
-            className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            onClick={() => {
+              setPublishStatus('draft');
+              handlePublish();
+            }}
+            disabled={loading}
+            className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
           >
             Save Draft
           </button>
           <button
             type="submit"
-            className="px-6 py-2 bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors"
+            disabled={loading}
+            className="px-6 py-2 bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors disabled:opacity-50 flex items-center"
           >
-            {publishStatus === 'draft' ? 'Save Draft' : 
-             publishStatus === 'scheduled' ? 'Schedule' : 'Publish Now'}
+            {loading ? (
+              <>
+                <Loader className="w-4 h-4 mr-2 animate-spin" />
+                {publishStatus === 'draft' ? 'Saving...' : 
+                 publishStatus === 'scheduled' ? 'Scheduling...' : 'Publishing...'}
+              </>
+            ) : (
+              <>
+                {publishStatus === 'draft' ? 'Save Draft' : 
+                 publishStatus === 'scheduled' ? 'Schedule' : 'Publish Now'}
+              </>
+            )}
           </button>
         </div>
       </div>
     </form>
   );
 };
+
+ReviewPublish.propTypes = {
+    data: PropTypes.shape({
+      basics: PropTypes.shape({
+        name: PropTypes.string.isRequired,
+        eventType: PropTypes.string.isRequired,
+        track: PropTypes.string.isRequired,
+        trackConfiguration: PropTypes.string,
+        participantLimit: PropTypes.number.isRequired
+      }).isRequired,
+      requirements: PropTypes.shape({
+        insurance: PropTypes.shape({
+          required: PropTypes.bool.isRequired,
+          details: PropTypes.string
+        }).isRequired,
+        sound: PropTypes.shape({
+          required: PropTypes.bool.isRequired,
+          limit: PropTypes.string,
+          details: PropTypes.string
+        }).isRequired,
+        equipment: PropTypes.arrayOf(PropTypes.string).isRequired
+      }).isRequired,
+      groups: PropTypes.arrayOf(PropTypes.shape({
+        id: PropTypes.string.isRequired,
+        name: PropTypes.string.isRequired,
+        color: PropTypes.string.isRequired,
+        maxParticipants: PropTypes.number.isRequired,
+        sessionDuration: PropTypes.number.isRequired
+      })).isRequired,
+      registration: PropTypes.shape({
+        openDate: PropTypes.string,
+        closeDate: PropTypes.string,
+        pricing: PropTypes.shape({
+          regular: PropTypes.string.isRequired,
+          earlyBird: PropTypes.string
+        }).isRequired
+      }).isRequired,
+      schedule: PropTypes.shape({
+        sessions: PropTypes.arrayOf(PropTypes.shape({
+          title: PropTypes.string.isRequired,
+          startTime: PropTypes.string.isRequired,
+          duration: PropTypes.number.isRequired,
+          groups: PropTypes.arrayOf(PropTypes.string).isRequired
+        })).isRequired
+      }).isRequired,
+      documents: PropTypes.shape({
+        supplementaryRules: PropTypes.array.isRequired,
+        trackMaps: PropTypes.array.isRequired,
+        waivers: PropTypes.array.isRequired,
+        techForms: PropTypes.array.isRequired
+      }).isRequired
+    }).isRequired,
+    onUpdate: PropTypes.func.isRequired,
+    onNext: PropTypes.func.isRequired,
+    onBack: PropTypes.func.isRequired
+  };
 
 export default ReviewPublish;
