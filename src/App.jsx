@@ -6,9 +6,19 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './config/firebase';
 
 // Layout Components
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
-import DashboardLayout from "@/components/layout/DashboardLayout";
+import Navbar from './components/layout/Navbar';
+import Footer from './components/layout/Footer';
+import DashboardLayout from './components/layout/DashboardLayout';
+
+// Page Components
+import HomePage from './components/pages/HomePage';
+import Features from './components/pages/Features';
+import Analytics from './components/pages/Analytics';
+import Events from './components/pages/Events';
+import PrivacyPolicy from './components/pages/PrivacyPolicy';
+import Contact from './components/pages/Contact';
+import Login from './pages/auth/Login';
+import SignUp from './pages/auth/SignUp';
 
 // Dashboard Components
 import DashboardHome from '@/components/dashboard/DashboardHome';
@@ -68,24 +78,30 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
-// App Routes Component
 function AppRoutes() {
   const location = useLocation();
-
-  // Debug route changes
-  useEffect(() => {
-    console.log('Current route:', location.pathname);
-  }, [location]);
 
   return (
     <AnimatePresence mode="wait" initial={false}>
       <Routes location={location} key={location.pathname}>
+        {/* Public Routes */}
+        <Route index element={<HomePage />} />
+        <Route path="features" element={<Features />} />
+        <Route path="analytics" element={<Analytics />} />
+        <Route path="events" element={<Events />} />
+        <Route path="contact" element={<Contact />} />
+        <Route path="privacy" element={<PrivacyPolicy />} />
+        
         {/* Auth Routes */}
-        <Route path="login" element={<Login />} />
-        <Route path="signup" element={<SignUp />} />
+        <Route path="login" element={
+          <Login />
+        } />
+        <Route path="signup" element={
+          <SignUp />
+        } />
 
-        {/* Protected Dashboard Routes */}
-        <Route 
+          {/* Protected Dashboard Routes */}
+          <Route 
           path="/dashboard/*" 
           element={
             <ProtectedRoute>
