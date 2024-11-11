@@ -5,9 +5,8 @@ import {
   Star, Bell, Mail, ChevronRight,
   Zap, Shield, Settings, Trophy
 } from 'lucide-react';
-import { db } from '@/config/firebase';
-import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
-import { supabase } from '@/lib/supabase'
+
+import { supabase } from '@/lib/supabase/client'
 
 const Events = () => {
   const [email, setEmail] = useState('');
