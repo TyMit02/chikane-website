@@ -26,6 +26,13 @@ export default defineConfig({
           ],
           utils: ['date-fns']  // Added for date utilities if you use them
         },
+        define: {
+          // Explicitly define env variables for production
+          'import.meta.env.VITE_SUPABASE_URL': 
+            JSON.stringify(process.env.VITE_SUPABASE_URL),
+          'import.meta.env.VITE_SUPABASE_ANON_KEY': 
+            JSON.stringify(process.env.VITE_SUPABASE_ANON_KEY),
+        },
         entryFileNames: 'assets/js/[name]-[hash].js',
         chunkFileNames: 'assets/js/[name]-[hash].js',
         assetFileNames: (assetInfo) => {
