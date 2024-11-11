@@ -7,7 +7,7 @@ console.log('Environment variables:', {
 })
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://puvgvjqafekwzljkfjbb.supabase.co'
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1dmd2anFhZmVrd3psamtmamJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzEyOTE0OTgsImV4cCI6MjA0Njg2NzQ5OH0.mPIGdVBhxb7gEpb8R-ezcmxNbWyh4KPahCKl1dOWqko'
 
 if (!supabaseUrl) {
   console.error('Supabase URL is missing. Current value:', supabaseUrl)
