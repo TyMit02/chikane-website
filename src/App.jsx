@@ -11,7 +11,7 @@ import Footer from '@/components/layout/Footer';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 
 // Page Components
-import HomePage from './components/pages/HomePage';
+import HomePage from './components/pages/Home';
 import Features from './components/pages/Features';
 import Analytics from './components/pages/Analytics';
 import Events from './components/pages/Events';
