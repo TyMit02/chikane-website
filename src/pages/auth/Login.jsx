@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { auth } from '@/config/firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { supabase } from '@/lib/supabase/client';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -27,28 +26,31 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const { user } = await signInWithEmailAndPassword(
-        auth,
-        formData.email,
-        formData.password
-      );
+      const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
+      });
 
-      // If login successful, redirect to dashboard or previous page
-      const intendedDestination = location.state?.from?.pathname || '/dashboard';
-      navigate(intendedDestination);
+      if (signInError) throw signInError;
+
+      if (user) {
+        // If login successful, redirect to dashboard or previous page
+        const intendedDestination = location.state?.from?.pathname || '/dashboard';
+        navigate(intendedDestination);
+      }
     } catch (error) {
+      console.error('Error: ', error);
       let errorMessage = '';
-      switch (error.code) {
-        case 'auth/invalid-email':
-          errorMessage = 'Invalid email address format.';
+      
+      // Map Supabase error messages to user-friendly messages
+      switch (error.message) {
+        case 'Invalid login credentials':
+          errorMessage = 'Invalid email or password.';
           break;
-        case 'auth/user-not-found':
-          errorMessage = 'No account found with this email.';
+        case 'Email not confirmed':
+          errorMessage = 'Please confirm your email before signing in.';
           break;
-        case 'auth/wrong-password':
-          errorMessage = 'Incorrect password.';
-          break;
-        case 'auth/too-many-requests':
+        case 'Too many requests':
           errorMessage = 'Too many login attempts. Please try again later.';
           break;
         default:

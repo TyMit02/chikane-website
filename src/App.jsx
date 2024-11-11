@@ -2,8 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { createContext, useContext, useEffect, useState } from 'react';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from './config/firebase';
+import { supabase } from '@/lib/supabase/client';
 
 // Layout Components
 import Navbar from '@/components/layout/Navbar';
@@ -18,11 +17,8 @@ import Events from './components/pages/Events';
 import PrivacyPolicy from './components/pages/PrivacyPolicy';
 import Contact from './components/pages/Contact';
 
-
 // Dashboard Components
 import DashboardHome from '@/components/dashboard/DashboardHome';
-console.log('DashboardHome component:', DashboardHome); // Add this line
-
 import EventsManagement from '@/components/dashboard/events/EventsManagement';
 import EventCreation from '@/components/dashboard/events/create/EventCreation';
 import EventTesting from '@/components/dashboard/events/EventTesting';
@@ -40,16 +36,32 @@ const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      console.log('Auth state changed:', user?.email);
-      setUser(user);
+    // Check active sessions
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
       setLoading(false);
     });
-    return unsubscribe;
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log('Auth state changed:', session?.user?.email);
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
+  const value = {
+    signUp: (data) => supabase.auth.signUp(data),
+    signIn: (data) => supabase.auth.signInWithPassword(data),
+    signOut: () => supabase.auth.signOut(),
+    user,
+    loading
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading }}>
+    <AuthContext.Provider value={value}>
       {!loading && children}
     </AuthContext.Provider>
   );
@@ -92,15 +104,11 @@ function AppRoutes() {
         <Route path="privacy" element={<PrivacyPolicy />} />
         
         {/* Auth Routes */}
-        <Route path="login" element={
-          <Login />
-        } />
-        <Route path="signup" element={
-          <SignUp />
-        } />
+        <Route path="login" element={<Login />} />
+        <Route path="signup" element={<SignUp />} />
 
-          {/* Protected Dashboard Routes */}
-          <Route 
+        {/* Protected Dashboard Routes */}
+        <Route 
           path="/dashboard/*" 
           element={
             <ProtectedRoute>
