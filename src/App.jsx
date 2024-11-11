@@ -17,8 +17,7 @@ import Analytics from '@/components/pages/Analytics';
 import Events from '@/components/pages/Events';
 import PrivacyPolicy from '@/components/pages/PrivacyPolicy';
 import Contact from '@/components/pages/Contact';
-import Login from '@/pages/auth/Login';
-import SignUp from '@/pages/auth/SignUp';
+
 
 // Dashboard Components
 import DashboardHome from '@/components/dashboard/DashboardHome';
