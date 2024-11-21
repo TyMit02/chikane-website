@@ -32,6 +32,7 @@ const SignUp = () => {
         options: {
           data: {
             full_name: formData.name,
+            avatar_url: null
           }
         }
       });

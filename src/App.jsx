@@ -26,7 +26,7 @@ import EventTesting from '@/components/dashboard/events/EventTesting';
 // Auth Pages
 import Login from '@/pages/auth/Login';
 import SignUp from '@/pages/auth/SignUp';
-
+import EmailConfirmation from '@/pages/auth/EmailConfirmation';
 // Auth Context
 const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
@@ -106,6 +106,7 @@ function AppRoutes() {
         {/* Auth Routes */}
         <Route path="login" element={<Login />} />
         <Route path="signup" element={<SignUp />} />
+        <Route path="auth/confirm" element={<EmailConfirmation />} /> {/* Moved outside dashboard routes */}
 
         {/* Protected Dashboard Routes */}
         <Route 

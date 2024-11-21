@@ -11,9 +11,9 @@ import {
 
 const Footer = () => {
   const socialLinks = [
-    { icon: <Facebook />, href: 'https://www.instagram.com/chikane_app/', label: 'Facebook' },
+    { icon: <Facebook />, href: '#', label: 'TikTok' },
     { icon: <Twitter />, href: '#', label: 'Twitter' },
-    { icon: <Instagram />, href: '#', label: 'Instagram' },
+    { icon: <Instagram />, href: 'https://www.instagram.com/chikane_app/', label: 'Instagram' },
     { icon: <Youtube />, href: '#', label: 'YouTube' }
   ];
 

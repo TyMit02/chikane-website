@@ -1,6 +1,8 @@
 import { ChevronRight, Timer, BarChart2, Flag, Users } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const HeroSection = () => {
+  const navigate = useNavigate(); 
   return (
     <div className="relative min-h-screen overflow-hidden pt-20">
       {/* Background Elements */}
@@ -22,15 +24,25 @@ const HeroSection = () => {
               Experience unmatched precision and analytics with our advanced GPS-based lap timer. Join the next generation of motorsport technology.
             </p>
 
-            <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
-              <button className="group flex items-center px-8 py-4 bg-accent text-white rounded-xl hover:bg-accent/90 transition-all">
-                <span>Download Now</span>
-                <ChevronRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform"/>
-              </button>
-              <button className="px-8 py-4 border-2 border-accent text-accent rounded-xl hover:bg-accent hover:text-white transition-all">
-                Learn More
-              </button>
-            </div>
+
+
+  <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
+    {/* Join the Waitlist Button */}
+    <button
+      className="group flex items-center px-8 py-4 bg-accent text-white rounded-xl hover:bg-accent/90 transition-all"
+      onClick={() => navigate('/events')}
+    >
+      <span>Join the waitlist</span>
+      <ChevronRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+    </button>
+
+    {/* Learn More Button */}
+    <button className="px-8 py-4 border-2 border-accent text-accent rounded-xl hover:bg-accent hover:text-white transition-all">
+      Learn More
+    </button>
+  </div>
+
+
 
             {/* Stats */}
             <div className="grid grid-cols-3 gap-8 pt-12">
